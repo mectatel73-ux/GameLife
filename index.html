@@ -12,13 +12,63 @@
     }
     #game { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
 
-    /* ==== ФОН С KEN BURNS ==== */
+    /* ==== ПРЕДЗАГРУЗКА ==== */
+    #preloader {
+        position: fixed; inset: 0;
+        background: linear-gradient(180deg, #1a0a15 0%, #0a0510 100%);
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+        z-index: 2000;
+        transition: opacity 1s;
+    }
+    #preloader.hide { opacity: 0; pointer-events: none; }
+    .preloader-title {
+        font-size: 72px; color: #ffd966;
+        font-family: 'Georgia', serif;
+        letter-spacing: 14px;
+        text-shadow: 0 0 60px rgba(255,200,120,0.7);
+        margin-bottom: 16px;
+        animation: titleGlow 4s ease-in-out infinite;
+    }
+    .preloader-sub {
+        font-size: 18px; color: #d0a060;
+        font-style: italic;
+        letter-spacing: 6px;
+        margin-bottom: 60px;
+    }
+    .preloader-bar {
+        width: 400px; max-width: 80vw;
+        height: 6px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 3px;
+        overflow: hidden;
+        border: 1px solid rgba(255,200,120,0.3);
+    }
+    .preloader-bar-fill {
+        height: 100%; width: 0%;
+        background: linear-gradient(90deg, #ffd966, #d4a040);
+        border-radius: 3px;
+        transition: width 0.3s ease;
+        box-shadow: 0 0 20px rgba(255,200,120,0.6);
+    }
+    .preloader-status {
+        margin-top: 20px;
+        font-size: 13px;
+        color: #8a7060;
+        letter-spacing: 3px;
+        font-style: italic;
+    }
+
+    /* ==== ФОН ==== */
     .bg-layer {
         position: absolute; inset: -3%;
         background-size: cover;
         background-position: center;
         opacity: 0;
         transition: opacity 2s ease;
+        image-rendering: -webkit-optimize-contrast;
+        backface-visibility: hidden;
+        transform: translateZ(0);
     }
     .bg-layer.active {
         opacity: 1;
@@ -336,6 +386,15 @@
 </head>
 <body>
 
+<!-- ПРЕДЗАГРУЗКА -->
+<div id="preloader">
+    <div class="preloader-title">ИБРАГИМ</div>
+    <div class="preloader-sub">～ Загрузка ～</div>
+    <div class="preloader-bar"><div class="preloader-bar-fill" id="preload-fill"></div></div>
+    <div class="preloader-status" id="preload-status">0 / 0</div>
+</div>
+
+<!-- СТАРТ -->
 <div id="start-screen">
     <div id="start-title">ИБРАГИМ</div>
     <div id="start-subtitle">～ Бесконечная дорога ～</div>
@@ -347,6 +406,7 @@
     </div>
 </div>
 
+<!-- ИГРА -->
 <div id="game">
     <div class="bg-blur active" id="bg-blur"></div>
     <div class="bg-layer active" id="bg"></div>
@@ -392,7 +452,70 @@ const state = {
 };
 
 // ============================================================
-// МУЗЫКА — Web Audio
+// СПИСОК ВСЕХ ФОТО
+// ============================================================
+const ALL_PHOTOS = [
+    'Детство Ижевск.jpg',
+    'Ижевск с Юлей.jpg',
+    'Встреча с Ильназом.jpg',
+    'Школьные времена.png',
+    'Время с Дашей.jpg',
+    'Веселые времена с Юлей после Даши.jpg',
+    'Стройка.jpg',
+    'Юля готовится к смерти.webp',
+    'Ибрагим курит в поле.jpg.webp',
+    'Ибрагим поход.jpg',
+    'Закуривает.jpg',
+    'Поход с друзьями.jpg',
+    'ЖК Светлый.jpg',
+    'Шинка.jpg',
+    'bratia.jpg',
+    'dasha.jpg',
+    'hushed.png',
+    'ishevsk.jpg',
+    'stroika.jpg',
+    'svetlyu.jpg',
+    'ulya.jpg',
+    'ulya2.webp',
+    'ulya3.jpg'
+];
+
+let loadedCount = 0;
+let failedImages = [];
+
+function preloadAllImages() {
+    return new Promise(resolve => {
+        if (ALL_PHOTOS.length === 0) { resolve(); return; }
+        ALL_PHOTOS.forEach(name => {
+            const img = new Image();
+            img.onload = () => {
+                loadedCount++;
+                updatePreloader();
+                if (loadedCount + failedImages.length === ALL_PHOTOS.length) resolve();
+            };
+            img.onerror = () => {
+                failedImages.push(name);
+                loadedCount++;
+                updatePreloader();
+                if (loadedCount + failedImages.length === ALL_PHOTOS.length) resolve();
+            };
+            img.src = encodeURI(name);
+        });
+    });
+}
+
+function updatePreloader() {
+    const total = ALL_PHOTOS.length;
+    const done = loadedCount;
+    const percent = Math.round((done / total) * 100);
+    const fill = document.getElementById('preload-fill');
+    const status = document.getElementById('preload-status');
+    if (fill) fill.style.width = percent + '%';
+    if (status) status.textContent = done + ' / ' + total;
+}
+
+// ============================================================
+// МУЗЫКА
 // ============================================================
 let audioCtx = null;
 let musicTimers = [];
@@ -454,15 +577,9 @@ function stopTheme() {
 // СЦЕНАРИЙ
 // ============================================================
 const script = {
-
-    // ============================================
-    // ПРОЛОГ
-    // ============================================
     prologue: {
-        bg: 'Детство Ижевск.jpg',
-        theme: 'melancholy',
-        title: 'ПРОЛОГ',
-        subtitle: '～ Бесконечная дорога ～',
+        bg: 'Детство Ижевск.jpg', theme: 'melancholy',
+        title: 'ПРОЛОГ', subtitle: '～ Бесконечная дорога ～',
         lines: [
             { speaker: '...', text: 'Есть люди, которые рождаются, чтобы жить. И есть те, кто рождается, чтобы искать.' },
             { speaker: '...', text: 'Ибрагим был из вторых. Он не знал, чего хочет. Знал только — чего не хочет.' },
@@ -472,15 +589,9 @@ const script = {
         ],
         choices: [{ text: 'Начать', next: 'ch1' }]
     },
-
-    // ============================================
-    // ГЛАВА 1: ДЕТСТВО
-    // ============================================
     ch1: {
-        bg: 'Детство Ижевск.jpg',
-        theme: 'childhood',
-        title: 'ГЛАВА I',
-        subtitle: '～ Детство ～',
+        bg: 'Детство Ижевск.jpg', theme: 'childhood',
+        title: 'ГЛАВА I', subtitle: '～ Детство ～',
         lines: [
             { speaker: '...', text: 'Ижевск. Маленький город в Удмуртии. Здесь он родился. Дом бабушки и дедушки. Двор с качелями. Дерево, на которое нельзя было залезать.' },
             { speaker: '...', text: 'И мама. Уставшая. С добрыми глазами. Она работала много — но всегда находила время погладить его по голове.' },
@@ -504,10 +615,8 @@ const script = {
             { text: '«Может, Бог — это не про правила. Может, что-то другое.»', next: 'ch1_doubt', faith: -10, lost: +10 }
         ]
     },
-
     ch1_faith: {
-        bg: 'Детство Ижевск.jpg',
-        theme: 'childhood',
+        bg: 'Детство Ижевск.jpg', theme: 'childhood',
         lines: [
             { speaker: '...', text: 'Он молился. Каждый день. По пять раз. Как учили. Заучивал новые суры. Задавал вопросы имаму.' },
             { speaker: 'Ибрагим', text: 'Я делаю всё правильно. Почему же так пусто?' },
@@ -516,10 +625,8 @@ const script = {
         ],
         choices: [{ text: '...', next: 'ch1_amina' }]
     },
-
     ch1_doubt: {
-        bg: 'Детство Ижевск.jpg',
-        theme: 'melancholy',
+        bg: 'Детство Ижевск.jpg', theme: 'melancholy',
         lines: [
             { speaker: 'Ибрагим', text: 'Может, Бог — это не про правила. Может, что-то, что чувствуешь.' },
             { speaker: '...', text: 'Эта мысль была страшной. И освобождающей. Он впервые почувствовал: он может думать сам. Без страха.' },
@@ -528,10 +635,8 @@ const script = {
         ],
         choices: [{ text: '...', next: 'ch1_amina' }]
     },
-
     ch1_amina: {
-        bg: 'Детство Ижевск.jpg',
-        theme: 'melancholy',
+        bg: 'Детство Ижевск.jpg', theme: 'melancholy',
         lines: [
             { speaker: '...', text: 'А потом появилась Амина. Красивая. Умная. Она улыбалась так, что он забывал слова. Смотрел — и не дышал.' },
             { speaker: 'Ибрагим', text: 'Амина, пойдём погуляем? Только ты и я.' },
@@ -546,14 +651,8 @@ const script = {
             { text: '⟳ А что, если бы я подошёл иначе?', next: 'pribit_amina', pribit: true }
         ]
     },
-
-    // ============================================
-    // ПРОБИТЬ СУДЬБУ — АМИНА
-    // ============================================
     pribit_amina: {
-        bg: 'Детство Ижевск.jpg',
-        theme: 'dread',
-        isPribit: true,
+        bg: 'Детство Ижевск.jpg', theme: 'dread', isPribit: true,
         lines: [
             { speaker: '...', text: 'Он закрывает глаза. И видит — как могло быть.' },
             { speaker: '...', text: 'Вот он подходит к ней иначе. Не как мальчик с разбитым сердцем. А спокойно. Уверенно. С шуткой.' },
@@ -565,10 +664,8 @@ const script = {
         needs: { pain: -10, faith: +5, hope: +5 },
         choices: [{ text: 'Вернуться', next: 'ch1_amina_back' }]
     },
-
     ch1_amina_back: {
-        bg: 'Детство Ижевск.jpg',
-        theme: 'melancholy',
+        bg: 'Детство Ижевск.jpg', theme: 'melancholy',
         lines: [
             { speaker: '...', text: 'Он возвращается в реальность. И понимает — выбор всё равно нужно делать.' },
             { speaker: '...', text: 'Но теперь — без вины. Без «а что, если». Просто — так было суждено.' }
@@ -578,22 +675,16 @@ const script = {
             { text: '«Мне никто не нужен. Никогда.»', next: 'ch2', hope: -15, mask: +20, pain: +10 }
         ]
     },
-
-    // ============================================
-    // ГЛАВА 2: ЮЛЯ
-    // ============================================
     ch2: {
-        bg: 'Ижевск с Юлей.jpg',
-        theme: 'love',
-        title: 'ГЛАВА II',
-        subtitle: '～ Юля ～',
+        bg: 'Ижевск с Юлей.jpg', theme: 'love',
+        title: 'ГЛАВА II', subtitle: '～ Юля ～',
         lines: [
             { speaker: '...', text: 'Ему одиннадцать. Ей тоже. Юля. Длинные волосы. Глаза, в которых что-то старое. Как будто она знала то, чего не знали дети.' },
             { speaker: 'Юля', text: 'Ибрагим, а ты веришь в Бога?' },
             { speaker: 'Ибрагим', text: 'Не знаю. А ты?' },
             { speaker: 'Юля', text: 'Я верю, что есть что-то. Но оно не спасает. Просто смотрит.' },
             { speaker: '...', text: 'Он не понял тогда. Запомнил. Он вообще запоминал всё, что она говорила.' },
-            { speaker: '...', text: 'Они гуляли. Играли. Смеялись. Впервые он чувствовал — не один. Не одинок. Как будто мир стал больше.' },
+            { speaker: '...', text: 'Они гуляли. Играли. Смеялись. Впервые он чувствовал — не один. Как будто мир стал больше.' },
             { speaker: 'Ибрагим', text: 'Юля, ты самая лучшая.' },
             { speaker: 'Юля', text: 'Ты тоже. Не забывай меня. Ладно?' },
             { speaker: 'Ибрагим', text: 'Никогда.' },
@@ -604,27 +695,23 @@ const script = {
             { text: '«Всё будет хорошо. Обещаю.»', next: 'ch2_promise', hope: +5 }
         ]
     },
-
     ch2_close: {
-        bg: 'Ижевск с Юлей.jpg',
-        theme: 'love',
+        bg: 'Ижевск с Юлей.jpg', theme: 'love',
         lines: [
-            { speaker: '...', text: 'Он держал её за руку. Они стояли на берегу реки. Казалось, время остановилось. Казалось — так будет всегда.' },
+            { speaker: '...', text: 'Он держал её за руку. Они стояли на берегу реки. Казалось, время остановилось.' },
             { speaker: '...', text: 'А через год Юля исчезла. СМС от неизвестного номера: «Юля умерла. Прости».' },
             { speaker: 'Ибрагим', text: 'Нет. Нет. Нет. Это неправда.' },
             { speaker: '...', text: 'Он плакал месяц. Два. Полгода. Он верил. Она обманула.' },
             { speaker: '...', text: 'Но он узнает об этом только через много лет.' }
         ],
-        needs: { mood: -25, pain: +20 },
+        needs: { pain: +20 },
         choices: [
             { text: '⟳ Что, если бы я не поверил?', next: 'pribit_julia', pribit: true },
             { text: 'Принять. Жить дальше.', next: 'ch3', faith: +10 }
         ]
     },
-
     ch2_promise: {
-        bg: 'Ижевск с Юлей.jpg',
-        theme: 'love',
+        bg: 'Ижевск с Юлей.jpg', theme: 'love',
         lines: [
             { speaker: 'Ибрагим', text: 'Ты не права, Юля. Всё будет хорошо. Обещаю.' },
             { speaker: 'Юля', text: 'Ты добрый. Слишком добрый.' },
@@ -637,14 +724,8 @@ const script = {
             { text: 'Принять. Жить дальше.', next: 'ch3' }
         ]
     },
-
-    // ============================================
-    // ПРОБИТЬ СУДЬБУ — ЮЛЯ
-    // ============================================
     pribit_julia: {
-        bg: 'Ижевск с Юлей.jpg',
-        theme: 'dread',
-        isPribit: true,
+        bg: 'Ижевск с Юлей.jpg', theme: 'dread', isPribit: true,
         lines: [
             { speaker: '...', text: 'Он закрывает глаза. И видит — как могло быть.' },
             { speaker: '...', text: 'Что, если бы он не поверил в её смерть? Что, если бы искал? Что, если бы нашёл?' },
@@ -657,15 +738,9 @@ const script = {
         needs: { pain: -10, faith: +10 },
         choices: [{ text: 'Вернуться', next: 'ch3' }]
     },
-
-    // ============================================
-    // ГЛАВА 3: КАЗАНЬ, ИЛЬНАЗ
-    // ============================================
     ch3: {
-        bg: 'Встреча с Ильназом.jpg',
-        theme: 'melancholy',
-        title: 'ГЛАВА III',
-        subtitle: '～ Ильназ ～',
+        bg: 'Встреча с Ильназом.jpg', theme: 'melancholy',
+        title: 'ГЛАВА III', subtitle: '～ Ильназ ～',
         lines: [
             { speaker: '...', text: 'Казань. 6 класс. Новая школа. Новые лица. Мама работала в магазине тканей. Целыми днями.' },
             { speaker: '...', text: 'Ибрагим был один. Снова один. Он привык к этому — но не смирился.' },
@@ -682,10 +757,8 @@ const script = {
             { text: '«Дружба — это не про меня»', next: 'ch3_2', hope: -10, mask: +10 }
         ]
     },
-
     ch3_1: {
-        bg: 'Школьные времена.png',
-        theme: 'childhood',
+        bg: 'Школьные времена.png', theme: 'childhood',
         lines: [
             { speaker: '...', text: 'Они играли в Сталкера. Ночами. Обсуждали миры, зоны, артефакты. Это были самые спокойные ночи в жизни Ибрагима.' },
             { speaker: 'Ильназ', text: 'Ибрагим, ты кем хочешь стать?' },
@@ -696,10 +769,8 @@ const script = {
         needs: { hope: +10, mask: -5 },
         choices: [{ text: '...', next: 'ch4' }]
     },
-
     ch3_2: {
-        bg: 'Школьные времена.png',
-        theme: 'melancholy',
+        bg: 'Школьные времена.png', theme: 'melancholy',
         lines: [
             { speaker: 'Ибрагим', text: 'Дружба — это не про меня.' },
             { speaker: '...', text: 'Но Ильназ всё равно был рядом. Всегда. Даже когда Ибрагим этого не заслуживал. Даже когда не замечал.' }
@@ -707,17 +778,11 @@ const script = {
         needs: { mask: +10, hope: -5 },
         choices: [{ text: '...', next: 'ch4' }]
     },
-
-    // ============================================
-    // ГЛАВА 4: ДАША
-    // ============================================
     ch4: {
-        bg: 'Время с Дашей.jpg',
-        theme: 'love',
-        title: 'ГЛАВА IV',
-        subtitle: '～ Даша ～',
+        bg: 'Время с Дашей.jpg', theme: 'love',
+        title: 'ГЛАВА IV', subtitle: '～ Даша ～',
         lines: [
-            { speaker: '...', text: '7 класс. Даша. Одноклассница. Неприступная. Он смотрел на неё. Каждый день. Все уроки. Он не мог понять — почему она.' },
+            { speaker: '...', text: '7 класс. Даша. Одноклассница. Неприступная. Он смотрел на неё. Каждый день. Все уроки. Он не мог понять — почему именно она.' },
             { speaker: 'Ибрагим', text: 'Даша, давай встретимся.' },
             { speaker: 'Даша', text: 'Нет.' },
             { speaker: '...', text: 'Он не сдался. Год. Два. Три. А параллельно — другие девушки. Он «перегулял» с половиной класса.' },
@@ -731,20 +796,16 @@ const script = {
             { text: '«Наконец-то. Но что дальше?»', next: 'ch4_2', faith: +10, lost: +5 }
         ]
     },
-
     ch4_1: {
-        bg: 'Время с Дашей.jpg',
-        theme: 'love',
+        bg: 'Время с Дашей.jpg', theme: 'love',
         lines: [
             { speaker: '...', text: 'Он старался. Дарил цветы. Писал стихи. Возил в кино. Она улыбалась. Ему казалось — это счастье.' },
             { speaker: '...', text: 'Но счастье было хрупким. Как стекло. Он это чувствовал — но гнал мысль.' }
         ],
         choices: [{ text: '...', next: 'ch5' }]
     },
-
     ch4_2: {
-        bg: 'Время с Дашей.jpg',
-        theme: 'melancholy',
+        bg: 'Время с Дашей.jpg', theme: 'melancholy',
         lines: [
             { speaker: 'Ибрагим', text: 'Наконец-то. Но что дальше?' },
             { speaker: '...', text: 'Этот вопрос он задавал себе три года. Пока был с ней. И не находил ответа.' }
@@ -752,15 +813,9 @@ const script = {
         needs: { faith: +5, lost: +5 },
         choices: [{ text: '...', next: 'ch5' }]
     },
-
-    // ============================================
-    // ГЛАВА 5: КУРЬЕРКА / ОЗОН
-    // ============================================
     ch5: {
-        bg: 'Стройка.jpg',
-        theme: 'melancholy',
-        title: 'ГЛАВА V',
-        subtitle: '～ Работа ～',
+        bg: 'Стройка.jpg', theme: 'melancholy',
+        title: 'ГЛАВА V', subtitle: '～ Работа ～',
         lines: [
             { speaker: '...', text: 'Мама уехала в Москву. Ипотека в Светлом. Ибрагим остался один — но не чувствовал одиночества. Работал. Много.' },
             { speaker: '...', text: 'Курьерка. С Ильназом. Потом — с Искандером. Весёлые были времена. Дерзкие. Молодые.' },
@@ -776,15 +831,9 @@ const script = {
             { text: '«Ответа нет. Есть только работа.»', next: 'ch6', lost: +15, hope: -10 }
         ]
     },
-
-    // ============================================
-    // ГЛАВА 6: ЮЛЯ ВОЗВРАЩАЕТСЯ
-    // ============================================
     ch6: {
-        bg: 'Веселые времена с Юлей после Даши.jpg',
-        theme: 'love',
-        title: 'ГЛАВА VI',
-        subtitle: '～ Возвращение ～',
+        bg: 'Веселые времена с Юлей после Даши.jpg', theme: 'love',
+        title: 'ГЛАВА VI', subtitle: '～ Возвращение ～',
         lines: [
             { speaker: '...', text: 'С Дашей — три года. И вдруг — измена. Он увидел переписку. Орал. Матерился. Расстались по ВК.' },
             { speaker: '...', text: 'Он улетел в Москву. К маме. Зарабатывать. А потом — попытался уйти. Его спасли. Больница. Шок. Страх смерти.' },
@@ -802,14 +851,8 @@ const script = {
             { text: 'Отпустить её. Отпустить прошлое.', next: 'ch7', faith: +15, pain: -10 }
         ]
     },
-
-    // ============================================
-    // ПРОБИТЬ СУДЬБУ — ВОЗВРАЩЕНИЕ ЮЛИ
-    // ============================================
     pribit_julia_return: {
-        bg: 'Веселые времена с Юлей после Даши.jpg',
-        theme: 'dread',
-        isPribit: true,
+        bg: 'Веселые времена с Юлей после Даши.jpg', theme: 'dread', isPribit: true,
         lines: [
             { speaker: '...', text: 'Он закрывает глаза. И видит — что, если бы он остался. По-настоящему. Не в голове, а в сердце.' },
             { speaker: '...', text: 'Он видит — они живут вместе. В Ижевске. У неё старый дом. У него работа. Простая жизнь. Тихая.' },
@@ -820,15 +863,9 @@ const script = {
         needs: { pain: -15, faith: +15, lost: -10 },
         choices: [{ text: 'Вернуться', next: 'ch7' }]
     },
-
-    // ============================================
-    // ГЛАВА 7: ПОСЛЕ
-    // ============================================
     ch7: {
-        bg: 'Юля готовится к смерти.webp',
-        theme: 'empty',
-        title: 'ГЛАВА VII',
-        subtitle: '～ После ～',
+        bg: 'Юля готовится к смерти.webp', theme: 'empty',
+        title: 'ГЛАВА VII', subtitle: '～ После ～',
         lines: [
             { speaker: '...', text: 'Юли больше нет. Он не любит об этом говорить. Не любит вспоминать. Она просто вышла из комнаты — и не вернулась.' },
             { speaker: '...', text: 'Он держался. Достойно. Молча. Как учила мама. Как учил дедушка. Как учил Роджерс — молчать, но быть рядом.' },
@@ -843,16 +880,10 @@ const script = {
             { text: 'Пойти домой. Спать.', next: 'finale' }
         ]
     },
-
-    // ============================================
-    // ПОСЛЕДНИЙ ПРОБИТЬ СУДЬБУ
-    // ============================================
     pribit_last: {
-        bg: 'Ибрагим курит в поле.jpg.webp',
-        theme: 'dread',
-        isPribit: true,
+        bg: 'Ибрагим курит в поле.jpg.webp', theme: 'dread', isPribit: true,
         lines: [
-            { speaker: '...', text: 'Он закрывает глаза. И видит — что, если бы он приехал раньше? Что, если бы он почувствовал её боль? Что, если бы позвонил в тот вечер?' },
+            { speaker: '...', text: 'Он закрывает глаза. И видит — что, если бы он приехал раньше? Что, если бы почувствовал её боль? Что, если бы позвонил в тот вечер?' },
             { speaker: '...', text: 'Он видит — вот он звонит. Она берёт трубку. Они говорят. Он едет к ней. Он говорит то, что должен был сказать.' },
             { speaker: '...', text: 'Они сидят на кухне. Пьют чай. Она плачет. Он держит её за руку. И в этот момент — ей становится легче. На один вечер. На один день.' },
             { speaker: '...', text: 'А потом — она уходит. Всё равно. Через месяц. Через год. Её боль была сильнее, чем любая любовь.' },
@@ -863,15 +894,9 @@ const script = {
         needs: { pain: -20, faith: +20, hope: +15, lost: -20 },
         choices: [{ text: 'Пойти домой', next: 'finale' }]
     },
-
-    // ============================================
-    // ФИНАЛ
-    // ============================================
     finale: {
-        bg: 'Ибрагим поход.jpg',
-        theme: 'insight',
-        title: 'ФИНАЛ',
-        subtitle: '～ Бесконечная дорога ～',
+        bg: 'Ибрагим поход.jpg', theme: 'insight',
+        title: 'ФИНАЛ', subtitle: '～ Бесконечная дорога ～',
         lines: [
             { speaker: '...', text: 'Он вышел на улицу. Утро. Туман над полем. Дорога. Он шёл. Просто шёл. Без цели. Без плана.' },
             { speaker: '...', text: 'И в этой тишине — он вдруг вспомнил всё. Маму. Бабушку. Дедушку. Роджерса. Юлю. Дашу. Ильназа. Саню. Друзей со склада. Сидр на балконе. Дым сигареты. Закат.' },
@@ -896,20 +921,41 @@ const script = {
 // ============================================================
 // ЛОГИКА
 // ============================================================
-
 let currentScene = null;
 let currentLine = 0;
 let isTyping = false;
 let typingTimer = null;
 let pribitUsed = {};
 
-function startGame() {
+async function startGame() {
     initAudio();
     document.getElementById('start-screen').classList.add('hide');
     setTimeout(() => {
         document.getElementById('start-screen').style.display = 'none';
-        goToScene('prologue');
     }, 1200);
+
+    await preloadAllImages();
+    document.getElementById('preloader').classList.add('hide');
+    setTimeout(() => {
+        document.getElementById('preloader').style.display = 'none';
+        goToScene('prologue');
+    }, 900);
+}
+
+function setBackground(filename) {
+    const bgEl = document.getElementById('bg');
+    const bgBlur = document.getElementById('bg-blur');
+    const encoded = encodeURI(filename);
+
+    bgEl.classList.remove('active');
+    bgBlur.classList.remove('active');
+
+    setTimeout(() => {
+        bgEl.style.backgroundImage = 'url("' + encoded + '")';
+        bgBlur.style.backgroundImage = 'url("' + encoded + '")';
+        bgEl.classList.add('active');
+        bgBlur.classList.add('active');
+    }, 100);
 }
 
 function goToScene(sceneId) {
@@ -919,32 +965,17 @@ function goToScene(sceneId) {
     currentScene = sceneId;
     currentLine = 0;
 
-    // Эффект пробива
     if (scene.isPribit) {
         const overlay = document.getElementById('pribit-overlay');
         overlay.classList.add('show');
         setTimeout(() => overlay.classList.remove('show'), 2500);
     }
 
-    // Фон
-    const bgEl = document.getElementById('bg');
-    const bgBlur = document.getElementById('bg-blur');
-    bgEl.classList.remove('active');
-    bgBlur.classList.remove('active');
-    setTimeout(() => {
-        bgEl.style.backgroundImage = `url('${scene.bg}')`;
-        bgBlur.style.backgroundImage = `url('${scene.bg}')`;
-        bgEl.classList.add('active');
-        bgBlur.classList.add('active');
-    }, 100);
+    setBackground(scene.bg);
 
-    // Музыка
     if (scene.theme) playTheme(scene.theme);
-
-    // Заголовок
     if (scene.title) showChapterTitle(scene.title, scene.subtitle);
 
-    // Применяем потребности
     if (scene.needs) {
         for (const k in scene.needs) {
             if (state.inner[k] !== undefined) {
@@ -967,16 +998,11 @@ function showChapterTitle(title, subtitle) {
 
 function showLine() {
     const scene = script[currentScene];
-
     if (currentLine >= scene.lines.length) {
-        if (scene.type === 'ending') {
-            showEnding();
-            return;
-        }
+        if (scene.type === 'ending') { showEnding(); return; }
         showChoices();
         return;
     }
-
     const line = scene.lines[currentLine];
     document.getElementById('speaker').textContent = line.speaker || '...';
     typeText(line.text);
@@ -987,7 +1013,6 @@ function typeText(text) {
     el.textContent = '';
     isTyping = true;
     let i = 0;
-
     clearInterval(typingTimer);
     typingTimer = setInterval(() => {
         if (i < text.length) {
@@ -1002,7 +1027,6 @@ function typeText(text) {
 
 function nextLine() {
     if (document.getElementById('choices').children.length > 0) return;
-
     if (isTyping) {
         clearInterval(typingTimer);
         const scene = script[currentScene];
@@ -1018,27 +1042,20 @@ function showChoices() {
     const scene = script[currentScene];
     const el = document.getElementById('choices');
     el.innerHTML = '';
-
     if (!scene.choices || scene.choices.length === 0) return;
 
     scene.choices.forEach(choice => {
         const btn = document.createElement('button');
         btn.className = 'choice-btn' + (choice.pribit ? ' pribit' : '');
         btn.textContent = choice.text;
-
-        // Если пробив уже был использован — не показываем
-        if (choice.pribit && pribitUsed[currentScene]) {
-            btn.style.display = 'none';
-        }
+        if (choice.pribit && pribitUsed[currentScene]) btn.style.display = 'none';
 
         btn.onclick = () => {
             if (choice.pribit) {
                 pribitUsed[currentScene] = true;
                 state.flags.pribit_count = (state.flags.pribit_count || 0) + 1;
             }
-
             state.choices[currentScene] = choice.text;
-
             if (choice.needs) {
                 for (const k in choice.needs) {
                     if (state.inner[k] !== undefined) {
@@ -1070,6 +1087,11 @@ function showEnding() {
     document.getElementById('end-quote').innerHTML =
         '«Бог не потерял тебя, Ибрагим.<br>Ты просто забыл, что тебя нашли.»';
     document.getElementById('end-screen').classList.add('show');
+
+    // Показать в консоли, какие фото не загрузились
+    if (failedImages.length > 0) {
+        console.warn('НЕ ЗАГРУЗИЛИСЬ ФОТО:', failedImages);
+    }
 }
 
 document.addEventListener('keydown', e => {
@@ -1079,7 +1101,6 @@ document.addEventListener('keydown', e => {
     }
 });
 
-// Пыль
 setInterval(() => {
     const dust = document.createElement('div');
     dust.className = 'dust';
