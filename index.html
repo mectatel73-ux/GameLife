@@ -2,859 +2,1212 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Жизнь Ибрагима — симулятор</title>
+<title>Ибрагим — Бесконечная дорога</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-        font-family: 'Segoe UI', Tahoma, sans-serif;
-        background: #1a1410;
-        color: #e0e0e0;
-        overflow: hidden;
-        height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    #game-wrap {
-        position: relative;
-        background: #0f0b08;
-        border-radius: 12px;
-        box-shadow: 0 30px 80px rgba(0,0,0,0.8);
-        overflow: hidden;
-    }
-    canvas {
-        display: block;
-        image-rendering: pixelated;
-    }
-
-    /* ==== ЛЕВЫЙ HUD ==== */
-    #left-hud {
-        position: absolute;
-        top: 16px;
-        left: 16px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        padding: 12px;
-        background: rgba(10,15,30,0.9);
-        border: 2px solid #2a3a5c;
-        border-radius: 12px;
-        width: 210px;
-    }
-    #left-hud h3 {
-        font-size: 11px;
-        color: #ffd966;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 4px;
-    }
-    .need-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 12px;
-    }
-    .need-icon { font-size: 16px; width: 20px; text-align: center; }
-    .need-bar {
-        flex: 1;
-        height: 10px;
-        background: rgba(0,0,0,0.5);
-        border-radius: 5px;
-        overflow: hidden;
-        border: 1px solid rgba(255,255,255,0.08);
-    }
-    .need-fill { height: 100%; transition: width 0.4s; border-radius: 4px; }
-
-    /* ==== ПРАВЫЙ HUD ==== */
-    #right-hud {
-        position: absolute;
-        top: 16px;
-        right: 16px;
-        width: 220px;
-        background: linear-gradient(180deg, rgba(20,30,50,0.95) 0%, rgba(10,15,30,0.95) 100%);
-        border: 2px solid #2a3a5c;
-        border-radius: 12px;
-        padding: 12px;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-        font-size: 13px;
-    }
-    .avatar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-    .avatar {
-        width: 48px; height: 48px; border-radius: 50%;
-        background: radial-gradient(circle at 30% 30%, #ffd966 0%, #c88e2a 100%);
-        border: 2px solid #ffd966;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 26px;
-        box-shadow: 0 0 20px rgba(255,217,102,0.4);
-    }
-    .avatar-info { flex: 1; }
-    .avatar-name { font-weight: bold; color: #fff; font-size: 14px; }
-    .avatar-level { color: #ffd966; font-size: 11px; }
-    .xp-bar {
-        width: 100%; height: 6px; background: rgba(255,255,255,0.1);
-        border-radius: 3px; margin-top: 4px; overflow: hidden;
-    }
-    .xp-bar-fill {
+    html, body {
         height: 100%;
-        background: linear-gradient(90deg, #ffd966, #ff8a3d);
-        width: 62%;
+        overflow: hidden;
+        font-family: 'Georgia', 'Times New Roman', serif;
+        background: #000;
+        user-select: none;
     }
-    .date-row {
-        display: flex; align-items: center; justify-content: space-between;
-        padding: 6px 0;
-        border-top: 1px solid #2a3a5c;
-        border-bottom: 1px solid #2a3a5c;
-        margin-bottom: 8px;
-    }
-    .date-text { color: #b0c0e0; font-size: 12px; }
-    .time-controls { display: flex; gap: 4px; }
-    .time-btn {
-        background: #2a3a5c; border: none; color: #b0c0e0;
-        width: 24px; height: 24px; border-radius: 4px;
-        cursor: pointer; font-size: 11px; transition: 0.15s;
-    }
-    .time-btn:hover { background: #3a4a7c; color: white; }
-    .time-btn.active { background: #ffd966; color: #1a1410; }
 
-    .stats { display: flex; flex-direction: column; gap: 4px; }
-    .stat-row {
-        display: flex; justify-content: space-between;
-        padding: 5px 8px;
-        background: rgba(255,255,255,0.04);
-        border-radius: 5px;
+    /* ==== ИГРОВОЙ ЭКРАН ==== */
+    #game {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
     }
-    .stat-label { color: #8a9ac0; font-size: 11px; text-transform: uppercase; }
-    .stat-value { color: #fff; font-weight: bold; font-size: 13px; }
-    .stat-value.money { color: #4dff88; }
 
-    /* ==== НИЖНЯЯ ПАНЕЛЬ ==== */
-    #bottom-bar {
+    /* ==== ФОН СЛОЯ ==== */
+    .bg {
         position: absolute;
-        bottom: 16px;
-        left: 50%;
-        transform: translateX(-50%);
-        display: flex;
-        gap: 8px;
-        padding: 10px 16px;
-        background: linear-gradient(180deg, rgba(20,30,50,0.95) 0%, rgba(10,15,30,0.95) 100%);
-        border: 2px solid #2a3a5c;
-        border-radius: 12px;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-    }
-    .tool-btn {
-        width: 44px; height: 44px;
-        border-radius: 10px;
-        background: linear-gradient(180deg, #3a4a7c 0%, #2a3a5c 100%);
-        border: 2px solid #4a5a8c;
-        color: #c0d0ff;
-        font-size: 20px;
-        cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        transition: 0.15s;
-    }
-    .tool-btn:hover {
-        background: linear-gradient(180deg, #4a5a9c 0%, #3a4a7c 100%);
-        border-color: #6a7aac;
-        transform: translateY(-3px);
-    }
-
-    /* ==== ПОДСКАЗКА ==== */
-    #hint {
-        position: absolute;
-        bottom: 78px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 6px 16px;
-        background: rgba(0,0,0,0.75);
-        border-radius: 8px;
-        font-size: 11px;
-        color: #8a9ac0;
-    }
-    #hint kbd {
-        background: #2a3a5c; color: #c0d0ff;
-        padding: 2px 6px; border-radius: 4px;
-        font-family: inherit;
-    }
-
-    /* ==== УВЕДОМЛЕНИЕ ==== */
-    #notification {
-        position: absolute;
-        top: 90px;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 10px 24px;
-        background: rgba(0,0,0,0.9);
-        border: 2px solid #ffd966;
-        border-radius: 10px;
-        color: #ffd966;
-        font-size: 14px;
-        font-weight: bold;
+        inset: 0;
+        background-size: cover;
+        background-position: center;
+        transition: opacity 1.2s ease, transform 8s ease;
         opacity: 0;
-        transition: opacity 0.3s;
-        pointer-events: none;
     }
-    #notification.show { opacity: 1; }
+    .bg.active { opacity: 1; transform: scale(1.05); }
 
-    /* ==== ПРОГРЕСС ДЕЙСТВИЯ ==== */
-    #action-bar {
+    /* ЗАКАТ НА ТРАССЕ */
+    .bg-road {
+        background:
+            radial-gradient(ellipse at 50% 60%, rgba(255,220,150,0.9) 0%, rgba(255,160,80,0.6) 20%, transparent 50%),
+            radial-gradient(ellipse at 50% 40%, #ffb86c 0%, #ff8a3d 25%, #a04030 50%, #3a1a2a 75%, #1a0a15 100%);
+    }
+    .bg-road::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 45%;
+        background: linear-gradient(180deg, transparent 0%, rgba(40,30,40,0.6) 30%, rgba(20,15,25,0.95) 100%);
+    }
+    .bg-road::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 4px;
+        height: 45%;
+        background: repeating-linear-gradient(180deg, #ffd966 0px, #ffd966 30px, transparent 30px, transparent 60px);
+        opacity: 0.4;
+    }
+
+    /* КВАРТИРА */
+    .bg-room {
+        background:
+            radial-gradient(circle at 30% 30%, rgba(255,200,120,0.15) 0%, transparent 40%),
+            radial-gradient(circle at 70% 70%, rgba(120,80,180,0.15) 0%, transparent 40%),
+            linear-gradient(135deg, #2a1e2e 0%, #1a1220 50%, #0f0a18 100%);
+    }
+    .bg-room::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            linear-gradient(90deg, transparent 0%, rgba(255,200,120,0.08) 50%, transparent 100%),
+            repeating-linear-gradient(0deg, transparent 0px, transparent 60px, rgba(255,255,255,0.02) 60px, rgba(255,255,255,0.02) 61px);
+    }
+
+    /* БАЛКОН НОЧЬЮ */
+    .bg-night {
+        background:
+            radial-gradient(circle at 70% 20%, rgba(255,220,180,0.2) 0%, transparent 30%),
+            linear-gradient(180deg, #1a1428 0%, #2a1a3a 40%, #3a1e2e 70%, #1a0a15 100%);
+    }
+    .bg-night::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(circle at 20% 15%, #fff 1px, transparent 2px),
+            radial-gradient(circle at 60% 25%, #fff 1px, transparent 2px),
+            radial-gradient(circle at 80% 10%, #fff 1px, transparent 2px),
+            radial-gradient(circle at 35% 35%, #fff 1px, transparent 2px),
+            radial-gradient(circle at 90% 40%, #fff 1px, transparent 2px),
+            radial-gradient(circle at 15% 45%, #fff 1px, transparent 2px),
+            radial-gradient(circle at 45% 55%, #fff 1px, transparent 2px);
+        opacity: 0.6;
+    }
+
+    /* СКЛАД */
+    .bg-warehouse {
+        background:
+            linear-gradient(180deg, #2a2a3a 0%, #1a1a28 100%);
+    }
+    .bg-warehouse::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            repeating-linear-gradient(90deg, transparent 0px, transparent 80px, rgba(255,200,80,0.15) 80px, rgba(255,200,80,0.15) 82px),
+            radial-gradient(circle at 50% 100%, rgba(255,200,80,0.25) 0%, transparent 60%);
+    }
+
+    /* ===== СПРАЙТ ИБРАГИМА ===== */
+    #ibrahim {
+        position: absolute;
+        bottom: 220px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 320px;
+        height: 420px;
+        transition: all 0.4s;
+        filter: drop-shadow(0 10px 30px rgba(0,0,0,0.6));
+        z-index: 5;
+    }
+
+    .char {
+        position: absolute;
+        inset: 0;
+        animation: breathe 4s ease-in-out infinite;
+    }
+    @keyframes breathe {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+    }
+
+    /* Тело */
+    .char-body {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 200px;
+        height: 260px;
+        background: linear-gradient(180deg, #1a1a1a 0%, #0f0f0f 100%);
+        border-radius: 60px 60px 30px 30px;
+        box-shadow: inset 20px 0 40px rgba(255,255,255,0.05), inset -20px 0 40px rgba(0,0,0,0.4);
+    }
+    .char-shirt-print {
+        position: absolute;
+        top: 60px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 30px;
+        background: linear-gradient(90deg, transparent, rgba(255,80,80,0.9), transparent);
+        clip-path: polygon(0 50%, 20% 0, 80% 0, 100% 50%, 80% 100%, 20% 100%);
+    }
+    .char-shirt-print::after {
+        content: 'STUCK FOREVER';
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 300px;
-        padding: 16px 20px;
-        background: rgba(0,0,0,0.9);
-        border: 2px solid #ffd966;
-        border-radius: 12px;
-        display: none;
+        color: #fff;
+        font-size: 8px;
+        font-weight: bold;
+        font-family: 'Arial Black', sans-serif;
+        letter-spacing: 1px;
+        white-space: nowrap;
+    }
+
+    /* Шея */
+    .char-neck {
+        position: absolute;
+        top: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 30px;
+        background: linear-gradient(180deg, #e0b890 0%, #c8a080 100%);
+        border-radius: 10px;
+    }
+
+    /* Голова */
+    .char-head {
+        position: absolute;
+        top: -120px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 160px;
+        background: linear-gradient(180deg, #f0c8a0 0%, #e0b890 100%);
+        border-radius: 50% 50% 45% 45%;
+        box-shadow: inset -15px -15px 30px rgba(0,0,0,0.1);
+    }
+
+    /* Волосы */
+    .char-hair {
+        position: absolute;
+        top: -140px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 150px;
+        height: 90px;
+        background: linear-gradient(180deg, #3a2418 0%, #2a1810 100%);
+        border-radius: 75px 75px 0 0;
+        box-shadow: inset 0 -10px 20px rgba(0,0,0,0.3);
+    }
+    .char-hair::after {
+        content: '';
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: linear-gradient(180deg, #2a1810 0%, transparent 100%);
+        clip-path: polygon(0 0, 15% 100%, 30% 20%, 50% 90%, 70% 20%, 85% 100%, 100% 0);
+    }
+
+    /* Глаза */
+    .char-eye {
+        position: absolute;
+        top: 30px;
+        width: 30px;
+        height: 20px;
+        background: #1a1a1a;
+        border-radius: 50%;
+    }
+    .char-eye.left { left: 25px; }
+    .char-eye.right { right: 25px; }
+    .char-eye::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 5px;
+        width: 8px;
+        height: 8px;
+        background: #fff;
+        border-radius: 50%;
+    }
+
+    /* Очки */
+    .char-glasses {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 45px;
+    }
+    .char-glass {
+        position: absolute;
+        top: 0;
+        width: 50px;
+        height: 45px;
+        border: 3px solid #1a1a1a;
+        border-radius: 8px;
+        background: rgba(200,220,255,0.15);
+    }
+    .char-glass.left { left: 0; }
+    .char-glass.right { right: 0; }
+    .char-glass-bridge {
+        position: absolute;
+        top: 20px;
+        left: 50px;
+        width: 20px;
+        height: 3px;
+        background: #1a1a1a;
+    }
+
+    /* Рот */
+    .char-mouth {
+        position: absolute;
+        top: 90px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 20px;
+        height: 3px;
+        background: #8a4030;
+        border-radius: 2px;
+        transition: all 0.3s;
+    }
+    .char-mouth.smile {
+        height: 15px;
+        width: 40px;
+        border-radius: 0 0 40px 40px;
+        background: #8a4030;
+    }
+    .char-mouth.sad {
+        height: 8px;
+        width: 30px;
+        border-radius: 40px 40px 0 0;
+        background: #8a4030;
+    }
+
+    /* ===== ДИАЛОГОВОЕ ОКНО ===== */
+    #dialogue-box {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 260px;
+        background: linear-gradient(180deg, rgba(10,5,20,0.5) 0%, rgba(5,2,12,0.95) 30%, rgba(5,2,12,0.98) 100%);
+        backdrop-filter: blur(8px);
+        border-top: 3px solid rgba(255,200,120,0.3);
+        z-index: 10;
+        padding: 30px 60px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #speaker {
+        display: inline-block;
+        padding: 6px 20px;
+        background: linear-gradient(180deg, #ffd966 0%, #d4a040 100%);
+        color: #1a0a15;
+        font-weight: bold;
+        font-size: 16px;
+        border-radius: 6px 6px 0 0;
+        margin-bottom: -3px;
+        box-shadow: 0 -4px 15px rgba(255,200,100,0.4);
+        font-family: 'Georgia', serif;
+        letter-spacing: 1px;
+    }
+
+    #dialogue-text {
+        flex: 1;
+        font-size: 19px;
+        line-height: 1.7;
+        color: #f0e8e0;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+        overflow-y: auto;
+        padding: 8px 0;
+        min-height: 100px;
+    }
+
+    #dialogue-text::-webkit-scrollbar { width: 4px; }
+    #dialogue-text::-webkit-scrollbar-thumb { background: rgba(255,200,120,0.3); border-radius: 2px; }
+
+    #continue-hint {
+        text-align: right;
+        font-size: 13px;
+        color: rgba(255,200,120,0.7);
+        animation: blink 1.5s infinite;
+        font-style: italic;
+    }
+    @keyframes blink {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 1; }
+    }
+
+    /* ===== ВЫБОР ===== */
+    #choices {
+        position: absolute;
+        bottom: 280px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 15;
+        width: 600px;
+    }
+
+    .choice-btn {
+        padding: 16px 30px;
+        background: linear-gradient(90deg, rgba(40,20,60,0.9) 0%, rgba(60,30,90,0.9) 50%, rgba(40,20,60,0.9) 100%);
+        border: 2px solid rgba(255,200,120,0.5);
+        color: #f0e8e0;
+        font-size: 17px;
+        font-family: 'Georgia', serif;
+        cursor: pointer;
+        transition: all 0.25s;
+        text-align: center;
+        border-radius: 8px;
+        position: relative;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .choice-btn:hover {
+        background: linear-gradient(90deg, rgba(255,200,120,0.15) 0%, rgba(255,200,120,0.3) 50%, rgba(255,200,120,0.15) 100%);
+        border-color: #ffd966;
+        transform: translateX(10px);
+        box-shadow: 0 8px 30px rgba(255,200,120,0.4);
+    }
+    .choice-btn::before {
+        content: '▶';
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #ffd966;
+        opacity: 0;
+        transition: 0.25s;
+    }
+    .choice-btn:hover::before { opacity: 1; }
+
+    /* ===== ЗАГОЛОВОК ГЛАВЫ ===== */
+    #chapter-title {
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0.8);
+        font-size: 72px;
+        color: #ffd966;
+        font-family: 'Georgia', serif;
+        text-shadow: 0 0 40px rgba(255,200,120,0.8), 0 10px 30px rgba(0,0,0,0.9);
+        opacity: 0;
+        pointer-events: none;
+        transition: all 1.5s;
+        letter-spacing: 8px;
+        z-index: 100;
         text-align: center;
     }
-    #action-bar.show { display: block; }
-    #action-text { color: #ffd966; font-weight: bold; margin-bottom: 10px; font-size: 15px; }
-    #action-progress {
-        width: 100%; height: 12px; background: rgba(255,255,255,0.15);
-        border-radius: 6px; overflow: hidden;
+    #chapter-title.show {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
     }
-    #action-progress-fill {
+    #chapter-title small {
+        display: block;
+        font-size: 22px;
+        letter-spacing: 4px;
+        color: #ffb86c;
+        margin-top: 10px;
+        opacity: 0.8;
+    }
+
+    /* ===== HUD ===== */
+    #hud {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        z-index: 20;
+        padding: 14px 18px;
+        background: rgba(5,2,12,0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255,200,120,0.3);
+        border-radius: 10px;
+        min-width: 220px;
+    }
+    #hud-title {
+        font-size: 12px;
+        color: #ffd966;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        font-family: 'Georgia', serif;
+    }
+    .hud-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        color: #d0c0e0;
+    }
+    .hud-icon { font-size: 15px; width: 20px; text-align: center; }
+    .hud-bar {
+        flex: 1;
+        height: 8px;
+        background: rgba(0,0,0,0.5);
+        border-radius: 4px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .hud-fill {
         height: 100%;
-        background: linear-gradient(90deg, #ffd966, #ff8a3d);
-        transition: width 0.1s linear;
+        border-radius: 4px;
+        transition: width 0.5s;
+    }
+
+    /* Атмосферная виньетка */
+    #vignette {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%);
+        z-index: 3;
+    }
+
+    /* Частицы пыли */
+    .dust {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        background: rgba(255,220,150,0.5);
+        border-radius: 50%;
+        pointer-events: none;
+        animation: float 8s linear infinite;
+        z-index: 4;
+    }
+    @keyframes float {
+        0% { transform: translate(0, 0) scale(1); opacity: 0; }
+        10% { opacity: 0.8; }
+        90% { opacity: 0.8; }
+        100% { transform: translate(80px, -100vh) scale(0.5); opacity: 0; }
+    }
+
+    /* Меню старта */
+    #start-screen {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(180deg, #1a0a15 0%, #0a0510 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        transition: opacity 1s;
+    }
+    #start-screen.hide { opacity: 0; pointer-events: none; }
+
+    #start-title {
+        font-size: 78px;
+        color: #ffd966;
+        font-family: 'Georgia', serif;
+        text-shadow: 0 0 40px rgba(255,200,120,0.6);
+        letter-spacing: 6px;
+        margin-bottom: 20px;
+        text-align: center;
+        animation: pulse 3s ease-in-out infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+    }
+    #start-subtitle {
+        font-size: 20px;
+        color: #d0a060;
+        font-style: italic;
+        margin-bottom: 60px;
+        letter-spacing: 3px;
+    }
+    #start-btn {
+        padding: 20px 70px;
+        font-size: 20px;
+        background: linear-gradient(180deg, #ffd966 0%, #d4a040 100%);
+        color: #1a0a15;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-family: 'Georgia', serif;
+        font-weight: bold;
+        letter-spacing: 3px;
+        transition: all 0.3s;
+        box-shadow: 0 0 40px rgba(255,200,120,0.4);
+    }
+    #start-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 60px rgba(255,200,120,0.8);
+    }
+
+    #start-hint {
+        margin-top: 40px;
+        color: #6a5060;
+        font-size: 13px;
+        font-style: italic;
+    }
+
+    /* Финальный экран */
+    #end-screen {
+        position: fixed;
+        inset: 0;
+        background: radial-gradient(ellipse at center, #2a1a2e 0%, #0a0510 100%);
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+        padding: 40px;
+        text-align: center;
+    }
+    #end-screen.show { display: flex; animation: fadeIn 2s; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    #end-title {
+        font-size: 60px;
+        color: #ffd966;
+        margin-bottom: 30px;
+        letter-spacing: 8px;
+        font-family: 'Georgia', serif;
+        text-shadow: 0 0 60px rgba(255,200,120,0.6);
+    }
+    #end-text {
+        font-size: 22px;
+        color: #d0c0e0;
+        max-width: 700px;
+        line-height: 1.8;
+        font-style: italic;
+        margin-bottom: 40px;
+    }
+    #end-restart {
+        padding: 16px 50px;
+        font-size: 16px;
+        background: transparent;
+        color: #ffd966;
+        border: 2px solid #ffd966;
+        border-radius: 8px;
+        cursor: pointer;
+        font-family: 'Georgia', serif;
+        letter-spacing: 2px;
+        transition: 0.3s;
+    }
+    #end-restart:hover {
+        background: #ffd966;
+        color: #1a0a15;
+    }
+
+    @media (max-width: 900px) {
+        #dialogue-box { height: 220px; padding: 20px 30px; }
+        #dialogue-text { font-size: 16px; }
+        #choices { width: 90%; bottom: 240px; }
+        #speaker { font-size: 14px; }
+        #chapter-title { font-size: 44px; }
+        #start-title { font-size: 48px; }
     }
 </style>
 </head>
 <body>
 
-<div id="game-wrap">
-    <canvas id="game" width="1280" height="720"></canvas>
+<!-- СТАРТОВЫЙ ЭКРАН -->
+<div id="start-screen">
+    <div id="start-title">ИБРАГИМ</div>
+    <div id="start-subtitle">～ Бесконечная дорога ～</div>
+    <button id="start-btn" onclick="startGame()">НАЧАТЬ</button>
+    <div id="start-hint">Визуальная новелла · 5 глав · 3 концовки</div>
+</div>
 
-    <!-- ЛЕВЫЙ HUD — потребности -->
-    <div id="left-hud">
-        <h3>Состояние Ибрагима</h3>
-        <div class="need-row"><span class="need-icon">🍔</span><div class="need-bar"><div class="need-fill" id="n-food" style="background:#ff6b6b"></div></div></div>
-        <div class="need-row"><span class="need-icon">😴</span><div class="need-bar"><div class="need-fill" id="n-sleep" style="background:#4dabf7"></div></div></div>
-        <div class="need-row"><span class="need-icon">🚿</span><div class="need-bar"><div class="need-fill" id="n-hygiene" style="background:#63e6be"></div></div></div>
-        <div class="need-row"><span class="need-icon">🚬</span><div class="need-bar"><div class="need-fill" id="n-nicotine" style="background:#adb5bd"></div></div></div>
-        <div class="need-row"><span class="need-icon">🍺</span><div class="need-bar"><div class="need-fill" id="n-cider" style="background:#ffa94d"></div></div></div>
-        <div class="need-row"><span class="need-icon">🕌</span><div class="need-bar"><div class="need-fill" id="n-faith" style="background:#b197fc"></div></div></div>
-        <div class="need-row"><span class="need-icon">✨</span><div class="need-bar"><div class="need-fill" id="n-mood" style="background:#ffd43b"></div></div></div>
-    </div>
+<!-- ИГРА -->
+<div id="game">
 
-    <!-- ПРАВЫЙ HUD -->
-    <div id="right-hud">
-        <div class="avatar-row">
-            <div class="avatar">🧑</div>
-            <div class="avatar-info">
-                <div class="avatar-name">Ибрагим</div>
-                <div class="avatar-level">Уровень <span id="lvl">1</span></div>
-                <div class="xp-bar"><div class="xp-bar-fill" id="xp-fill"></div></div>
+    <!-- ФОНЫ -->
+    <div class="bg bg-road active" id="bg-road"></div>
+    <div class="bg bg-room" id="bg-room"></div>
+    <div class="bg bg-warehouse" id="bg-warehouse"></div>
+    <div class="bg bg-night" id="bg-night"></div>
+
+    <!-- ВИНЬЕТКА -->
+    <div id="vignette"></div>
+
+    <!-- СПРАЙТ ИБРАГИМА -->
+    <div id="ibrahim">
+        <div class="char">
+            <div class="char-hair"></div>
+            <div class="char-head">
+                <div class="char-glasses">
+                    <div class="char-glass left"></div>
+                    <div class="char-glass right"></div>
+                    <div class="char-glass-bridge"></div>
+                </div>
+                <div class="char-eye left"></div>
+                <div class="char-eye right"></div>
+                <div class="char-mouth" id="mouth"></div>
+            </div>
+            <div class="char-neck"></div>
+            <div class="char-body">
+                <div class="char-shirt-print"></div>
             </div>
         </div>
-
-        <div class="date-row">
-            <span class="date-text" id="date-text">14 окт, Вт</span>
-            <div class="time-controls">
-                <button class="time-btn" onclick="setSpeed(0)">⏸</button>
-                <button class="time-btn active" id="sp1" onclick="setSpeed(1)">▶</button>
-                <button class="time-btn" id="sp2" onclick="setSpeed(2)">▶▶</button>
-                <button class="time-btn" id="sp4" onclick="setSpeed(4)">▶▶▶</button>
-            </div>
-        </div>
-
-        <div class="stats">
-            <div class="stat-row"><span class="stat-label">Деньги</span><span class="stat-value money" id="stat-money">₽ 5 200</span></div>
-            <div class="stat-row"><span class="stat-label">Работа</span><span class="stat-value" id="stat-work">Склад</span></div>
-            <div class="stat-row"><span class="stat-label">Смена</span><span class="stat-value" id="stat-shift">—</span></div>
-        </div>
     </div>
 
-    <!-- НИЖНЯЯ ПАНЕЛЬ -->
-    <div id="bottom-bar">
-        <button class="tool-btn" title="Инвентарь" onclick="showNotification('📋 Инвентарь пуст')">📋</button>
-        <button class="tool-btn" title="Магазин" onclick="showNotification('🛒 Магазин: скоро')">🛒</button>
-        <button class="tool-btn" title="Достижения" onclick="showNotification('🏆 Пока 0 достижений')">🏆</button>
-        <button class="tool-btn" title="Статистика" onclick="showNotification('📊 Статистика: скоро')">📊</button>
-        <button class="tool-btn" title="Настройки" onclick="showNotification('⚙️ Настройки: скоро')">⚙️</button>
+    <!-- HUD -->
+    <div id="hud">
+        <div id="hud-title">СОСТОЯНИЕ</div>
+        <div class="hud-row"><span class="hud-icon">🍔</span><div class="hud-bar"><div class="hud-fill" id="h-food" style="background:#ff6b6b;width:70%"></div></div></div>
+        <div class="hud-row"><span class="hud-icon">😴</span><div class="hud-bar"><div class="hud-fill" id="h-sleep" style="background:#4dabf7;width:75%"></div></div></div>
+        <div class="hud-row"><span class="hud-icon">🚬</span><div class="hud-bar"><div class="hud-fill" id="h-nicotine" style="background:#adb5bd;width:60%"></div></div></div>
+        <div class="hud-row"><span class="hud-icon">🍺</span><div class="hud-bar"><div class="hud-fill" id="h-cider" style="background:#ffa94d;width:50%"></div></div></div>
+        <div class="hud-row"><span class="hud-icon">🕌</span><div class="hud-bar"><div class="hud-fill" id="h-faith" style="background:#b197fc;width:80%"></div></div></div>
+        <div class="hud-row"><span class="hud-icon">✨</span><div class="hud-bar"><div class="hud-fill" id="h-mood" style="background:#ffd43b;width:70%"></div></div></div>
     </div>
 
-    <div id="hint"><kbd>WASD</kbd> — ходить · <kbd>E</kbd> — действие · <kbd>ESC</kbd> — сброс</div>
+    <!-- ЗАГОЛОВОК ГЛАВЫ -->
+    <div id="chapter-title"></div>
 
-    <div id="notification"></div>
+    <!-- ВЫБОРЫ -->
+    <div id="choices"></div>
 
-    <div id="action-bar">
-        <div id="action-text">Сплю...</div>
-        <div id="action-progress"><div id="action-progress-fill" style="width:0%"></div></div>
+    <!-- ДИАЛОГ -->
+    <div id="dialogue-box">
+        <div id="speaker">Ибрагим</div>
+        <div id="dialogue-text">...</div>
+        <div id="continue-hint">▼ Нажми, чтобы продолжить</div>
     </div>
+
+</div>
+
+<!-- ФИНАЛ -->
+<div id="end-screen">
+    <div id="end-title">КОНЕЦ</div>
+    <div id="end-text"></div>
+    <button id="end-restart" onclick="location.reload()">СНАЧАЛА</button>
 </div>
 
 <script>
 // ============================================================
-// СИМУЛЯТОР ЖИЗНИ ИБРАГИМА
+// ИБРАГИМ — Бесконечная дорога
+// Визуальная новелла
 // ============================================================
-
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-const W = canvas.width;
-const H = canvas.height;
 
 // ==== СОСТОЯНИЕ ====
 const state = {
-    speed: 1,
-    gameTime: 7 * 60, // 07:00
-    day: 14,
-    month: 10,
-    year: 2026,
-    money: 5200,
-    level: 1,
-    xp: 20,
     needs: {
-        food: 65, sleep: 75, hygiene: 70,
-        nicotine: 55, cider: 45, faith: 80, mood: 70
+        food: 70,
+        sleep: 75,
+        nicotine: 60,
+        cider: 50,
+        faith: 80,
+        mood: 70
     },
-    thought: 'Ибрагим, пора вставать...',
-    thoughtTimer: 0,
-    action: null,
-    actionDuration: 0,
-    actionElapsed: 0,
-    actionLabel: ''
+    choices: {}, // история выборов
+    flags: {},   // флаги
+    currentScene: null,
+    sceneIndex: 0,
+    isTyping: false,
+    typingTimer: null
 };
 
-// ==== ИБРАГИМ ====
-const player = {
-    x: 200, y: 500,
-    w: 24, h: 36,
-    speed: 180,
-    dir: 'down',
-    animFrame: 0,
-    animTime: 0,
-    isMoving: false
+// ==== СЦЕНАРИЙ ====
+const script = {
+
+    // ============ ПРОЛОГ ============
+    prologue: {
+        bg: 'road',
+        title: 'Пролог',
+        subtitle: '～ Утро ～',
+        lines: [
+            { speaker: '...', text: 'Утро. Дорога. Туман над асфальтом.', mood: 'sad' },
+            { speaker: '...', text: 'Ибрагим стоит на обочине. В наушниках — тишина.', mood: 'sad' },
+            { speaker: 'Ибрагим', text: 'Опять. Каждое утро одно и то же.', mood: 'sad' },
+            { speaker: 'Ибрагим', text: 'Автобус опоздал. На складе уже, наверное, все на местах.', mood: 'sad' },
+            { speaker: '...', text: 'Вдалеке показался автобус. Старенький, с потёртой жёлтой полосой.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Ну наконец-то.', mood: 'neutral' }
+        ],
+        choices: [
+            { text: 'Сесть в автобус и поехать на склад', next: 'warehouse' },
+            { text: 'Пропустить автобус. Остаться на дороге', next: 'skip_bus' }
+        ]
+    },
+
+    // ============ ПРОПУСТИЛ АВТОБУС ============
+    skip_bus: {
+        bg: 'road',
+        lines: [
+            { speaker: 'Ибрагим', text: 'Нет. Не сегодня.', mood: 'neutral' },
+            { speaker: '...', text: 'Автобус уехал. Ибрагим остался один.', mood: 'sad' },
+            { speaker: 'Ибрагим', text: 'Может, оно и к лучшему...', mood: 'sad' },
+            { speaker: '...', text: 'Он достал сигарету. Закурил. Закат озарил его лицо.', mood: 'sad' }
+        ],
+        needs: { nicotine: +20, mood: -10 },
+        choices: [
+            { text: 'Всё-таки поехать на работу', next: 'warehouse' },
+            { text: 'Пойти домой', next: 'home_skip' }
+        ]
+    },
+
+    // ============ СКЛАД ============
+    warehouse: {
+        bg: 'warehouse',
+        title: 'Глава 1',
+        subtitle: '～ Склад ～',
+        lines: [
+            { speaker: '...', text: 'Склад встретил Ибрагима шумом конвейеров и запахом картона.', mood: 'neutral' },
+            { speaker: 'Бригадир', text: 'Ибрагим! Опять опоздал! Ворота 14 ждут.', mood: 'sad' },
+            { speaker: 'Ибрагим', text: 'Извините. Автобус...', mood: 'sad' },
+            { speaker: 'Бригадир', text: 'Знаю. Всегда "автобус". Иди работай.', mood: 'neutral' },
+            { speaker: '...', text: 'Ибрагим взял ТСД. Пошёл к воротам. Старый сорт, новый сорт...', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Главное — дожить до конца смены.', mood: 'sad' }
+        ],
+        choices: [
+            { text: 'Работать быстро, без ошибок', next: 'work_fast' },
+            { text: 'Работать спокойно, в своём темпе', next: 'work_slow' },
+            { text: 'Отпроситься у бригадира и уйти', next: 'leave_work' }
+        ]
+    },
+
+    work_fast: {
+        bg: 'warehouse',
+        lines: [
+            { speaker: '...', text: 'Ибрагим работал как робот. Сканировал, грузил, отмечал.', mood: 'neutral' },
+            { speaker: '...', text: 'К концу смены он не сделал ни одной ошибки.', mood: 'neutral' },
+            { speaker: 'Бригадир', text: 'Ибрагим, ты молодец. Премия тебе.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Спасибо. Мне... приятно.', mood: 'happy' },
+            { speaker: '...', text: 'Ибрагим получил премию. +5000 ₽', mood: 'happy' }
+        ],
+        needs: { mood: +15, faith: +10, food: -20, sleep: -25 },
+        flags: { bonus: true },
+        choices: [
+            { text: 'Пойти домой', next: 'home' }
+        ]
+    },
+
+    work_slow: {
+        bg: 'warehouse',
+        lines: [
+            { speaker: '...', text: 'Ибрагим работал в своём темпе. Не спешил. Думал.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Зачем всё это? Грузить коробки всю жизнь...', mood: 'sad' },
+            { speaker: '...', text: 'Смена тянулась долго. Очень долго.', mood: 'sad' }
+        ],
+        needs: { mood: -5, food: -15, sleep: -20 },
+        choices: [
+            { text: 'Пойти домой', next: 'home' }
+        ]
+    },
+
+    leave_work: {
+        bg: 'warehouse',
+        lines: [
+            { speaker: 'Ибрагим', text: 'Бригадир, можно мне уйти? Плохо себя чувствую.', mood: 'sad' },
+            { speaker: 'Бригадир', text: 'Опять? Ибрагим, это уже третий раз за месяц.', mood: 'sad' },
+            { speaker: 'Ибрагим', text: 'Простите...', mood: 'sad' },
+            { speaker: '...', text: 'Ибрагим вышел на улицу. Начался дождь.', mood: 'sad' }
+        ],
+        needs: { mood: -20, faith: -15 },
+        flags: { warning: true },
+        choices: [
+            { text: 'Пойти домой', next: 'home' }
+        ]
+    },
+
+    // ============ ДОМ ============
+    home: {
+        bg: 'room',
+        title: 'Глава 2',
+        subtitle: '～ Дом ～',
+        lines: [
+            { speaker: '...', text: 'Квартира встретила тишиной. Только холодильник гудит.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Дом, милый дом.', mood: 'sad' },
+            { speaker: '...', text: 'Он снял кроксы. Бросил сумку у двери.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Что делать сегодня?', mood: 'neutral' }
+        ],
+        choices: [
+            { text: 'Поесть — в холодильнике что-то есть', next: 'home_eat' },
+            { text: 'Помолиться — время намаза', next: 'home_pray' },
+            { text: 'Сесть за компьютер', next: 'home_pc' },
+            { text: 'Выйти на балкон', next: 'balcony' }
+        ]
+    },
+
+    home_eat: {
+        bg: 'room',
+        lines: [
+            { speaker: '...', text: 'В холодильнике — вчерашний плов и початая бутылка сидра.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Плов и сидр. Классика.', mood: 'happy' },
+            { speaker: '...', text: 'Ибрагим поел. Стало теплее на душе.', mood: 'happy' }
+        ],
+        needs: { food: +40, cider: +20, mood: +5 },
+        choices: [
+            { text: 'Пойти на балкон', next: 'balcony' },
+            { text: 'Лечь спать', next: 'sleep' }
+        ]
+    },
+
+    home_pray: {
+        bg: 'room',
+        lines: [
+            { speaker: '...', text: 'Ибрагим расстелил коврик. Встал лицом к востоку.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Бисмилляхи рахмани рахим...', mood: 'neutral' },
+            { speaker: '...', text: 'Он читал намаз медленно, вдумчиво. Как учила мама.', mood: 'happy' },
+            { speaker: 'Ибрагим', text: 'Так спокойнее. Как будто всё на своих местах.', mood: 'happy' }
+        ],
+        needs: { faith: +40, mood: +20 },
+        flags: { prayed: true },
+        choices: [
+            { text: 'Пойти на балкон', next: 'balcony' },
+            { text: 'Лечь спать', next: 'sleep' }
+        ]
+    },
+
+    home_pc: {
+        bg: 'room',
+        lines: [
+            { speaker: '...', text: 'Компьютер загудел. Знакомый звук.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Может, поиграть? Или посмотреть что-то?', mood: 'neutral' },
+            { speaker: '...', text: 'Ибрагим сидел за компом два часа. Время пролетело незаметно.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Пора заканчивать. Завтра опять на склад.', mood: 'sad' }
+        ],
+        needs: { mood: +5, sleep: -10, food: -10 },
+        choices: [
+            { text: 'Пойти на балкон', next: 'balcony' },
+            { text: 'Лечь спать', next: 'sleep' }
+        ]
+    },
+
+    // ============ БАЛКОН ============
+    balcony: {
+        bg: 'night',
+        title: 'Глава 3',
+        subtitle: '～ Балкон ～',
+        lines: [
+            { speaker: '...', text: 'На балконе — прохладно. Город внизу светится.', mood: 'neutral' },
+            { speaker: '...', text: 'Ибрагим достал сигарету. Закурил. Дым поплыл вверх.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Иногда кажется, что я стою на месте...', mood: 'sad' },
+            { speaker: 'Ибрагим', text: 'А время идёт. Дни летят. И ничего не меняется.', mood: 'sad' }
+        ],
+        needs: { nicotine: +30, mood: +5 },
+        choices: [
+            { text: 'Позвонить маме', next: 'balcony_mom' },
+            { text: 'Просто смотреть на город', next: 'balcony_look' },
+            { text: 'Открыть сидр', next: 'balcony_cider' }
+        ]
+    },
+
+    balcony_mom: {
+        bg: 'night',
+        lines: [
+            { speaker: '...', text: 'Ибрагим набрал номер. Гудки. Мама взяла трубку.', mood: 'neutral' },
+            { speaker: 'Мама', text: 'Ибрагим? Сынок, как ты?', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Нормально, мам. Работаю.', mood: 'sad' },
+            { speaker: 'Мама', text: 'Ты там поешь? Не забывай читать намаз.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Да, мам. Всё хорошо.', mood: 'happy' },
+            { speaker: '...', text: 'Они поговорили полчаса. Ибрагиму стало легче.', mood: 'happy' }
+        ],
+        needs: { mood: +25, faith: +15 },
+        flags: { called_mom: true },
+        choices: [
+            { text: 'Лечь спать', next: 'sleep' }
+        ]
+    },
+
+    balcony_look: {
+        bg: 'night',
+        lines: [
+            { speaker: '...', text: 'Ибрагим смотрел на город. На огни. На жизнь.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Где-то там живут другие люди. У них всё по-другому.', mood: 'sad' },
+            { speaker: 'Ибрагим', text: 'А я здесь. С сигаретой. Один.', mood: 'sad' },
+            { speaker: '...', text: 'Ветер подул. Стало холоднее.', mood: 'sad' }
+        ],
+        needs: { mood: -5, faith: +5 },
+        choices: [
+            { text: 'Лечь спать', next: 'sleep' }
+        ]
+    },
+
+    balcony_cider: {
+        bg: 'night',
+        lines: [
+            { speaker: '...', text: 'Ибрагим открыл бутылку сидра. Сделал глоток.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Холодный. Хорошо.', mood: 'happy' },
+            { speaker: '...', text: 'Он сидел на балконе, смотрел на закат, пил сидр.', mood: 'happy' },
+            { speaker: 'Ибрагим', text: 'Может, всё не так уж плохо.', mood: 'happy' }
+        ],
+        needs: { cider: +40, mood: +15, sleep: -10 },
+        choices: [
+            { text: 'Лечь спать', next: 'sleep' }
+        ]
+    },
+
+    // ============ СОН / ФИНАЛ ============
+    sleep: {
+        bg: 'night',
+        title: 'Глава 4',
+        subtitle: '～ Ночь ～',
+        lines: [
+            { speaker: '...', text: 'Ибрагим лёг на кровать. Уставился в потолок.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Завтра — снова на склад. Снова грузить.', mood: 'sad' },
+            { speaker: 'Ибрагим', text: 'Но это ничего. Главное — не сдаваться.', mood: 'neutral' },
+            { speaker: '...', text: 'Мысли текли медленно. Глаза закрывались.', mood: 'neutral' }
+        ],
+        choices: [
+            { text: 'Задуматься о будущем', next: 'dream' },
+            { text: 'Заснуть', next: 'ending' }
+        ]
+    },
+
+    dream: {
+        bg: 'night',
+        lines: [
+            { speaker: '...', text: 'Ибрагим думал о будущем. О чём-то большем.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Может, однажды я уеду отсюда. Начну что-то своё.', mood: 'happy' },
+            { speaker: 'Ибрагим', text: 'Своё дело. Свою жизнь. Свой путь.', mood: 'happy' },
+            { speaker: '...', text: 'Эта мысль согрела его. Он заснул с улыбкой.', mood: 'happy' }
+        ],
+        needs: { mood: +20 },
+        flags: { hopeful: true },
+        choices: [
+            { text: '...', next: 'ending' }
+        ]
+    },
+
+    ending: {
+        bg: 'night',
+        title: 'Финал',
+        subtitle: '～ Бесконечная дорога ～',
+        lines: [
+            { speaker: '...', text: 'Утро. Дорога. Туман над асфальтом.', mood: 'neutral' },
+            { speaker: '...', text: 'Ибрагим стоит на обочине. В наушниках — музыка.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Опять. Каждое утро одно и то же.', mood: 'neutral' },
+            { speaker: 'Ибрагим', text: 'Но сегодня... я чувствую себя иначе.', mood: 'happy' },
+            { speaker: '...', text: 'Он улыбнулся. Вдалеке показался автобус.', mood: 'happy' },
+            { speaker: 'Ибрагим', text: 'Поехали.', mood: 'happy' }
+        ],
+        type: 'ending'
+    }
 };
 
-// ==== КОМНАТЫ ====
-// Координаты в пикселях экрана
-const rooms = [
-    { x: 40,  y: 60,  w: 300, h: 260, name: 'Спальня',  color: '#3a2a4a', border: '#5a3a6a', floor: '#2a1a3a' },
-    { x: 380, y: 60,  w: 320, h: 260, name: 'Кухня',    color: '#2a3a3a', border: '#3a5a5a', floor: '#1a2a2a' },
-    { x: 740, y: 60,  w: 300, h: 260, name: 'Гостиная', color: '#3a2a2a', border: '#6a4a3a', floor: '#2a1a1a' },
-    { x: 40,  y: 360, w: 300, h: 260, name: 'Ванная',   color: '#2a3a4a', border: '#3a5a7a', floor: '#1a2a3a' },
-    { x: 380, y: 360, w: 320, h: 260, name: 'Коридор',  color: '#2a2a3a', border: '#4a4a6a', floor: '#1a1a2a' },
-    { x: 740, y: 360, w: 300, h: 260, name: 'Балкон',   color: '#2a2030', border: '#5a4050', floor: '#1a1520' }
-];
+// ============================================================
+// ЛОГИКА
+// ============================================================
 
-// ==== ОБЪЕКТЫ ====
-// x, y — центр объекта. room — индекс комнаты
-const objects = [
-    // Спальня (room 0)
-    { x: 120, y: 180, room: 0, icon: '🛏️', label: 'Спать',           action: 'sleep',   size: 40 },
-    { x: 260, y: 140, room: 0, icon: '🚪', label: 'Одеться',         action: 'dress',   size: 32 },
-    { x: 260, y: 260, room: 0, icon: '📖', label: 'Читать намаз',    action: 'pray',    size: 32 },
+let currentScene = null;
+let currentLine = 0;
+let isTyping = false;
+let typingTimer = null;
 
-    // Кухня (room 1)
-    { x: 450, y: 140, room: 1, icon: '🍳', label: 'Готовить',        action: 'cook',    size: 36 },
-    { x: 550, y: 140, room: 1, icon: '🧊', label: 'Поесть',          action: 'eat',     size: 36 },
-    { x: 640, y: 250, room: 1, icon: '🍺', label: 'Выпить сидр',     action: 'cider',   size: 32 },
+function startGame() {
+    document.getElementById('start-screen').classList.add('hide');
+    setTimeout(() => {
+        document.getElementById('start-screen').style.display = 'none';
+        goToScene('prologue');
+    }, 800);
+}
 
-    // Гостиная (room 2)
-    { x: 810, y: 160, room: 2, icon: '🛋️', label: 'Отдохнуть',       action: 'rest',    size: 40 },
-    { x: 950, y: 140, room: 2, icon: '📺', label: 'Смотреть ТВ',     action: 'tv',      size: 36 },
-    { x: 850, y: 260, room: 2, icon: '💻', label: 'Работать',        action: 'work',    size: 36 },
+function goToScene(sceneId) {
+    const scene = script[sceneId];
+    if (!scene) return;
 
-    // Ванная (room 3)
-    { x: 120, y: 480, room: 3, icon: '🚿', label: 'Душ',             action: 'shower',  size: 40 },
-    { x: 250, y: 500, room: 3, icon: '🪞', label: 'Умыться',         action: 'wash',    size: 32 },
+    currentScene = sceneId;
+    currentLine = 0;
 
-    // Коридор (room 4)
-    { x: 540, y: 500, room: 4, icon: '🚪', label: 'На склад',        action: 'work_out',size: 44 },
+    // Фон
+    document.querySelectorAll('.bg').forEach(b => b.classList.remove('active'));
+    const bgEl = document.getElementById('bg-' + scene.bg);
+    if (bgEl) bgEl.classList.add('active');
 
-    // Балкон (room 5)
-    { x: 820, y: 480, room: 5, icon: '🚬', label: 'Покурить',        action: 'smoke',   size: 36 },
-    { x: 940, y: 480, room: 5, icon: '🌅', label: 'Полюбоваться',    action: 'look',    size: 36 }
-];
+    // Заголовок главы
+    if (scene.title) {
+        showChapterTitle(scene.title, scene.subtitle);
+    }
 
-// ==== ЧАСТИЦЫ ====
-let particles = [];
+    // Мысли скрыть/показать
+    if (scene.choices && scene.choices.length > 0 && currentLine === 0 && !scene.title) {
+        // покажем после линий
+    }
 
-// ==== ВВОД ====
-const keys = {};
+    // Начинаем с первой строки
+    showLine();
+}
 
-window.addEventListener('keydown', e => {
-    const k = e.key.toLowerCase();
-    keys[k] = true;
-    if (k === 'e') tryInteract();
-    if (k === 'escape') location.reload();
-    if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
-});
-window.addEventListener('keyup', e => {
-    keys[e.key.toLowerCase()] = false;
-});
+function showChapterTitle(title, subtitle) {
+    const el = document.getElementById('chapter-title');
+    el.innerHTML = title + (subtitle ? '<small>' + subtitle + '</small>' : '');
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2800);
+}
 
-// ==== ДЕЙСТВИЯ ====
-function tryInteract() {
-    if (state.action) return;
-    // Ищем ближайший объект в радиусе 60 пикселей
-    let nearest = null;
-    let minDist = 70;
-    objects.forEach(obj => {
-        const d = Math.hypot(player.x - obj.x, player.y - obj.y);
-        if (d < minDist) { minDist = d; nearest = obj; }
-    });
-    if (!nearest) {
-        showNotification('Рядом ничего нет');
+function showLine() {
+    const scene = script[currentScene];
+
+    // Если строки кончились → показываем выборы
+    if (currentLine >= scene.lines.length) {
+        showChoices();
         return;
     }
 
-    state.action = nearest.action;
-    state.actionDuration = getActionDuration(nearest.action);
-    state.actionElapsed = 0;
-    state.actionLabel = nearest.icon + ' ' + nearest.label;
-    document.getElementById('action-bar').classList.add('show');
-    document.getElementById('action-text').textContent = state.actionLabel;
+    const line = scene.lines[currentLine];
+
+    // Спикер
+    document.getElementById('speaker').textContent = line.speaker || '...';
+
+    // Настроение — меняем рот
+    const mouth = document.getElementById('mouth');
+    mouth.className = 'char-mouth';
+    if (line.mood === 'happy') mouth.classList.add('smile');
+    if (line.mood === 'sad') mouth.classList.add('sad');
+
+    // Печатаем текст
+    typeText(line.text);
 }
 
-function getActionDuration(a) {
-    return {
-        sleep: 8, eat: 3, cook: 4, shower: 3, wash: 2,
-        smoke: 4, cider: 3, pray: 3, tv: 5, work: 6,
-        work_out: 8, rest: 4, dress: 2, look: 4
-    }[a] || 3;
-}
+function typeText(text) {
+    const el = document.getElementById('dialogue-text');
+    el.textContent = '';
+    isTyping = true;
+    let i = 0;
 
-function finishAction() {
-    const a = state.action;
-    const n = state.needs;
-
-    if (a === 'sleep')   { n.sleep = Math.min(100, n.sleep + 50); n.mood = Math.min(100, n.mood + 5); }
-    if (a === 'eat')     { n.food = Math.min(100, n.food + 45); }
-    if (a === 'cook')    { n.food = Math.min(100, n.food + 30); n.mood = Math.min(100, n.mood + 3); }
-    if (a === 'shower')  { n.hygiene = Math.min(100, n.hygiene + 60); n.mood = Math.min(100, n.mood + 5); }
-    if (a === 'wash')    { n.hygiene = Math.min(100, n.hygiene + 25); }
-    if (a === 'smoke')   { n.nicotine = Math.min(100, n.nicotine + 50); n.mood = Math.min(100, n.mood + 5); n.hygiene = Math.max(0, n.hygiene - 5); }
-    if (a === 'cider')   { n.cider = Math.min(100, n.cider + 60); n.mood = Math.min(100, n.mood + 10); }
-    if (a === 'pray')    { n.faith = Math.min(100, n.faith + 50); n.mood = Math.min(100, n.mood + 15); showNotification('🕌 Намаз прочитан'); }
-    if (a === 'tv')      { n.mood = Math.min(100, n.mood + 8); n.sleep = Math.max(0, n.sleep - 5); }
-    if (a === 'work')    {
-        state.money += Math.round(300 + Math.random() * 500);
-        n.mood = Math.max(0, n.mood - 5);
-        n.sleep = Math.max(0, n.sleep - 15);
-        n.food = Math.max(0, n.food - 10);
-    }
-    if (a === 'work_out') {
-        state.money += Math.round(2000 + Math.random() * 1500);
-        n.mood = Math.max(0, n.mood - 15);
-        n.food = Math.max(0, n.food - 30);
-        n.sleep = Math.max(0, n.sleep - 25);
-        n.hygiene = Math.max(0, n.hygiene - 20);
-        state.gameTime += 8 * 60; // +8 часов
-        showNotification('🚚 Ибрагим вернулся со склада');
-    }
-    if (a === 'rest')    { n.mood = Math.min(100, n.mood + 10); n.sleep = Math.min(100, n.sleep + 10); }
-    if (a === 'look')    { n.mood = Math.min(100, n.mood + 20); }
-    if (a === 'dress')   { n.mood = Math.min(100, n.mood + 2); }
-
-    // Опыт
-    state.xp += 3;
-    if (state.xp >= 100) { state.xp -= 100; state.level++; showNotification('🎉 Уровень ' + state.level + '!'); }
-
-    state.action = null;
-    document.getElementById('action-bar').classList.remove('show');
-    updateHUD();
-}
-
-function showNotification(text) {
-    const el = document.getElementById('notification');
-    el.textContent = text;
-    el.classList.add('show');
-    clearTimeout(el._t);
-    el._t = setTimeout(() => el.classList.remove('show'), 2200);
-}
-
-// ==== ЛОГИКА ====
-function update(dt) {
-    const sdt = dt * state.speed;
-
-    // Время: 2 игровых минуты в реальную секунду
-    state.gameTime += sdt * 2;
-    if (state.gameTime >= 24 * 60) {
-        state.gameTime -= 24 * 60;
-        state.day++;
-        if (state.day > 30) { state.day = 1; state.month++; if (state.month > 12) { state.month = 1; state.year++; } }
-    }
-
-    // Потребности падают
-    state.needs.food = Math.max(0, state.needs.food - sdt * 0.15);
-    state.needs.hygiene = Math.max(0, state.needs.hygiene - sdt * 0.08);
-    state.needs.nicotine = Math.max(0, state.needs.nicotine - sdt * 0.2);
-    state.needs.cider = Math.max(0, state.needs.cider - sdt * 0.1);
-    state.needs.sleep = Math.max(0, state.needs.sleep - sdt * 0.12);
-    state.needs.faith = Math.max(0, state.needs.faith - sdt * 0.05);
-
-    const avg = (state.needs.food + state.needs.sleep + state.needs.hygiene + state.needs.nicotine + state.needs.cider + state.needs.faith) / 6;
-    state.needs.mood = state.needs.mood * 0.99 + avg * 0.01;
-    state.needs.mood = Math.max(0, Math.min(100, state.needs.mood));
-
-    // Мысли
-    state.thoughtTimer -= sdt;
-    if (state.thoughtTimer <= 0) {
-        state.thoughtTimer = 5 + Math.random() * 5;
-        state.thought = generateThought();
-    }
-
-    // Действие
-    if (state.action) {
-        state.actionElapsed += sdt;
-        const progress = Math.min(100, state.actionElapsed / state.actionDuration * 100);
-        document.getElementById('action-progress-fill').style.width = progress + '%';
-        if (state.actionElapsed >= state.actionDuration) finishAction();
-    } else {
-        // Движение
-        let dx = 0, dy = 0;
-        if (keys['w'] || keys['arrowup']) dy -= 1;
-        if (keys['s'] || keys['arrowdown']) dy += 1;
-        if (keys['a'] || keys['arrowleft']) dx -= 1;
-        if (keys['d'] || keys['arrowright']) dx += 1;
-
-        if (dx || dy) {
-            const len = Math.hypot(dx, dy);
-            dx /= len; dy /= len;
-            player.x += dx * player.speed * sdt;
-            player.y += dy * player.speed * sdt;
-            player.isMoving = true;
-            player.animTime += sdt;
-            if (player.animTime > 0.15) { player.animFrame = (player.animFrame + 1) % 4; player.animTime = 0; }
-            if (Math.abs(dx) > Math.abs(dy)) player.dir = dx > 0 ? 'right' : 'left';
-            else player.dir = dy > 0 ? 'down' : 'up';
+    clearInterval(typingTimer);
+    typingTimer = setInterval(() => {
+        if (i < text.length) {
+            el.textContent += text[i];
+            i++;
         } else {
-            player.isMoving = false;
-            player.animFrame = 0;
+            clearInterval(typingTimer);
+            isTyping = false;
         }
+    }, 28);
+}
 
-        // Границы
-        player.x = Math.max(60, Math.min(W - 60, player.x));
-        player.y = Math.max(80, Math.min(H - 80, player.y));
+function nextLine() {
+    if (isTyping) {
+        // Пропустить анимацию
+        clearInterval(typingTimer);
+        const scene = script[currentScene];
+        document.getElementById('dialogue-text').textContent = scene.lines[currentLine].text;
+        isTyping = false;
+        return;
+    }
+    currentLine++;
+    showLine();
+}
+
+function showChoices() {
+    const scene = script[currentScene];
+    const el = document.getElementById('choices');
+    el.innerHTML = '';
+
+    // Если это финал — сразу к концовке
+    if (scene.type === 'ending') {
+        showEnding();
+        return;
     }
 
-    // Частицы
-    particles = particles.filter(p => {
-        p.x += p.vx * sdt;
-        p.y += p.vy * sdt;
-        p.life -= sdt;
-        return p.life > 0;
+    // Если есть только один выбор "..." — просто продолжаем
+    if (scene.choices && scene.choices.length === 1 && scene.choices[0].text === '...') {
+        goToScene(scene.choices[0].next);
+        return;
+    }
+
+    scene.choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.textContent = choice.text;
+        btn.onclick = () => {
+            state.choices[currentScene] = choice.text;
+
+            // Применяем изменения потребностей если есть
+            if (choice.needs) {
+                for (const k in choice.needs) {
+                    if (state.needs[k] !== undefined) {
+                        state.needs[k] = Math.max(0, Math.min(100, state.needs[k] + choice.needs[k]));
+                    }
+                }
+            }
+            if (choice.flags) {
+                Object.assign(state.flags, choice.flags);
+            }
+
+            updateHUD();
+            goToScene(choice.next);
+        };
+        el.appendChild(btn);
     });
-
-    // Дым/пар
-    if (state.action === 'smoke' || state.action === 'shower') {
-        if (Math.random() < 0.4) {
-            particles.push({
-                x: player.x + (Math.random() - 0.5) * 20,
-                y: player.y - 20,
-                vx: (Math.random() - 0.5) * 30,
-                vy: -40 - Math.random() * 30,
-                life: 1.5, maxLife: 1.5,
-                color: state.action === 'smoke' ? 'rgba(200,200,220,' : 'rgba(150,200,255,',
-                size: 5 + Math.random() * 5
-            });
-        }
-    }
 }
 
-function generateThought() {
-    const n = state.needs;
-    const t = [];
-    if (n.food < 30) t.push('Есть хочу...');
-    if (n.sleep < 30) t.push('Спать бы...');
-    if (n.hygiene < 30) t.push('В душ бы...');
-    if (n.nicotine < 30) t.push('Покурить бы...');
-    if (n.cider < 30) t.push('Сидр бы сейчас...');
-    if (n.faith < 40) t.push('Намаз надо...');
-    if (n.mood < 30) t.push('Грустно...');
-
-    if (t.length === 0) {
-        const idle = [
-            'Ибрагим, ты справишься.',
-            'Хорошо...',
-            'Спокойно.',
-            'Закат красивый.',
-            'Завтра на склад...',
-            'Стараюсь быть лучше.',
-            'Может, сидр?',
-            'Пора намаз читать...',
-            'Главное — не сдаваться.'
-        ];
-        return idle[Math.floor(Math.random() * idle.length)];
-    }
-    return t[Math.floor(Math.random() * t.length)];
-}
-
-// ==== РЕНДЕР ====
-function draw() {
-    ctx.fillStyle = '#0a0812';
-    ctx.fillRect(0, 0, W, H);
-
-    const hour = state.gameTime / 60;
-    const isNight = hour < 6 || hour >= 22;
-    const isSunset = hour >= 18 && hour < 22;
-    const isDawn = hour >= 5 && hour < 7;
-
-    // Комнаты
-    rooms.forEach(room => {
-        // Пол
-        ctx.fillStyle = room.floor;
-        ctx.fillRect(room.x, room.y, room.w, room.h);
-
-        // Паттерн паркета
-        ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-        ctx.lineWidth = 1;
-        for (let i = room.x; i < room.x + room.w; i += 24) {
-            ctx.beginPath(); ctx.moveTo(i, room.y); ctx.lineTo(i, room.y + room.h); ctx.stroke();
-        }
-        for (let j = room.y; j < room.y + room.h; j += 24) {
-            ctx.beginPath(); ctx.moveTo(room.x, j); ctx.lineTo(room.x + room.w, j); ctx.stroke();
-        }
-
-        // Стены (толстая рамка)
-        ctx.strokeStyle = room.border;
-        ctx.lineWidth = 6;
-        ctx.strokeRect(room.x, room.y, room.w, room.h);
-
-        // Название комнаты
-        ctx.fillStyle = 'rgba(255,255,255,0.25)';
-        ctx.font = 'bold 13px Segoe UI';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'top';
-        ctx.fillText(room.name.toUpperCase(), room.x + 10, room.y + 10);
-
-        // Балкон — закат
-        if (room.name === 'Балкон') {
-            const g = ctx.createLinearGradient(room.x, room.y, room.x, room.y + room.h);
-            g.addColorStop(0, 'rgba(255,150,80,0.4)');
-            g.addColorStop(1, 'rgba(100,50,100,0.2)');
-            ctx.fillStyle = g;
-            ctx.fillRect(room.x, room.y, room.w, room.h);
-        }
-    });
-
-    // Объекты
-    objects.forEach(obj => {
-        // Тень
-        ctx.fillStyle = 'rgba(0,0,0,0.4)';
-        ctx.beginPath();
-        ctx.ellipse(obj.x, obj.y + obj.size / 2 - 4, obj.size / 2, 6, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Иконка
-        ctx.font = obj.size + 'px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(obj.icon, obj.x, obj.y);
-
-        // Подсветка ближайшего
-        const dist = Math.hypot(player.x - obj.x, player.y - obj.y);
-        if (dist < 70 && !state.action) {
-            ctx.strokeStyle = '#ffd966';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(obj.x, obj.y, obj.size / 2 + 8, 0, Math.PI * 2);
-            ctx.stroke();
-
-            // Подсказка "E"
-            ctx.fillStyle = '#ffd966';
-            ctx.beginPath();
-            ctx.arc(obj.x + obj.size / 2 + 8, obj.y - obj.size / 2 - 4, 12, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#1a1410';
-            ctx.font = 'bold 14px Segoe UI';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('E', obj.x + obj.size / 2 + 8, obj.y - obj.size / 2 - 4);
-        }
-    });
-
-    // Частицы
-    particles.forEach(p => {
-        const alpha = p.life / p.maxLife;
-        ctx.fillStyle = p.color + alpha + ')';
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
-        ctx.fill();
-    });
-
-    // Игрок
-    drawPlayer();
-
-    // Ночь
-    if (isNight) {
-        ctx.fillStyle = 'rgba(10,10,40,0.5)';
-        ctx.fillRect(0, 0, W, H);
-    } else if (isSunset) {
-        ctx.fillStyle = 'rgba(255,120,60,0.15)';
-        ctx.fillRect(0, 0, W, H);
-    } else if (isDawn) {
-        ctx.fillStyle = 'rgba(255,150,100,0.12)';
-        ctx.fillRect(0, 0, W, H);
-    }
-}
-
-function drawPlayer() {
-    const x = player.x;
-    const y = player.y;
-
-    // Тень
-    ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    ctx.beginPath();
-    ctx.ellipse(x, y + 18, 14, 5, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    const bob = player.isMoving ? Math.sin(player.animFrame * Math.PI / 2) * 2 : 0;
-
-    // Имя над головой
-    ctx.font = 'bold 12px Segoe UI';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    const nameW = ctx.measureText('Ибрагим').width + 14;
-    ctx.fillStyle = 'rgba(0,0,0,0.75)';
-    ctx.beginPath();
-    ctx.roundRect(x - nameW / 2, y - 62, nameW, 18, 8);
-    ctx.fill();
-    ctx.fillStyle = '#ffd966';
-    ctx.fillText('Ибрагим', x, y - 49);
-
-    // Кроксы (белые)
-    ctx.fillStyle = '#f0f0f0';
-    ctx.fillRect(x - 10, y + 16, 8, 6);
-    ctx.fillRect(x + 2, y + 16, 8, 6);
-    ctx.strokeStyle = '#b0b0b0';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(x - 10, y + 16, 8, 6);
-    ctx.strokeRect(x + 2, y + 16, 8, 6);
-
-    // Штаны (серые)
-    ctx.fillStyle = '#6a6a78';
-    ctx.fillRect(x - 8, y + 4 + bob, 16, 14);
-    ctx.strokeStyle = '#4a4a58';
-    ctx.strokeRect(x - 8, y + 4 + bob, 16, 14);
-
-    // Футболка (чёрная)
-    ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(x - 10, y - 8 + bob, 20, 14);
-    ctx.strokeStyle = '#333';
-    ctx.strokeRect(x - 10, y - 8 + bob, 20, 14);
-
-    // Принт STUCK
-    ctx.fillStyle = '#ff4a4a';
-    ctx.fillRect(x - 5, y - 3 + bob, 10, 4);
-
-    // Руки
-    ctx.fillStyle = '#e8c8a8';
-    ctx.fillRect(x - 13, y - 6 + bob, 3, 10);
-    ctx.fillRect(x + 10, y - 6 + bob, 3, 10);
-
-    // Голова
-    ctx.fillStyle = '#e8c8a8';
-    ctx.fillRect(x - 9, y - 26 + bob, 18, 18);
-    ctx.strokeStyle = '#a08060';
-    ctx.strokeRect(x - 9, y - 26 + bob, 18, 18);
-
-    // Волосы
-    ctx.fillStyle = '#2a1a10';
-    ctx.fillRect(x - 9, y - 28 + bob, 18, 7);
-
-    // Очки
-    ctx.strokeStyle = '#000';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(x - 4, y - 17 + bob, 3, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(x + 4, y - 17 + bob, 3, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x - 1, y - 17 + bob); ctx.lineTo(x + 1, y - 17 + bob); ctx.stroke();
-
-    // Облачко мысли
-    if (!state.action) {
-        const text = state.thought;
-        ctx.font = '13px Segoe UI';
-        const tw = ctx.measureText(text).width + 20;
-        const th = 28;
-        const bx = x - tw / 2;
-        const by = y - 100;
-
-        ctx.fillStyle = 'rgba(255,255,255,0.95)';
-        ctx.beginPath();
-        ctx.roundRect(bx, by, tw, th, 12);
-        ctx.fill();
-        ctx.strokeStyle = '#888';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-
-        // Хвостик
-        ctx.beginPath();
-        ctx.moveTo(x - 5, by + th);
-        ctx.lineTo(x, by + th + 8);
-        ctx.lineTo(x + 5, by + th);
-        ctx.closePath();
-        ctx.fillStyle = 'rgba(255,255,255,0.95)';
-        ctx.fill();
-        ctx.strokeStyle = '#888';
-        ctx.stroke();
-
-        ctx.fillStyle = '#333';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(text, x, by + th / 2 + 1);
-    }
-}
-
-// roundRect polyfill
-if (!CanvasRenderingContext2D.prototype.roundRect) {
-    CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
-        this.beginPath();
-        this.moveTo(x + r, y);
-        this.arcTo(x + w, y, x + w, y + h, r);
-        this.arcTo(x + w, y + h, x, y + h, r);
-        this.arcTo(x, y + h, x, y, r);
-        this.arcTo(x, y, x + w, y, r);
-        this.closePath();
-        return this;
-    };
-}
-
-// ==== HUD ====
 function updateHUD() {
-    document.getElementById('n-food').style.width = state.needs.food + '%';
-    document.getElementById('n-sleep').style.width = state.needs.sleep + '%';
-    document.getElementById('n-hygiene').style.width = state.needs.hygiene + '%';
-    document.getElementById('n-nicotine').style.width = state.needs.nicotine + '%';
-    document.getElementById('n-cider').style.width = state.needs.cider + '%';
-    document.getElementById('n-faith').style.width = state.needs.faith + '%';
-    document.getElementById('n-mood').style.width = state.needs.mood + '%';
-
-    document.getElementById('stat-money').textContent = '₽ ' + state.money.toLocaleString('ru-RU');
-    document.getElementById('lvl').textContent = state.level;
-    document.getElementById('xp-fill').style.width = state.xp + '%';
-
-    const hh = String(Math.floor(state.gameTime / 60)).padStart(2, '0');
-    const mm = String(Math.floor(state.gameTime % 60)).padStart(2, '0');
-    const months = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
-    const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
-    const dow = days[state.day % 7];
-    document.getElementById('date-text').textContent = `${state.day} ${months[state.month - 1]}, ${dow} · ${hh}:${mm}`;
+    document.getElementById('h-food').style.width = state.needs.food + '%';
+    document.getElementById('h-sleep').style.width = state.needs.sleep + '%';
+    document.getElementById('h-nicotine').style.width = state.needs.nicotine + '%';
+    document.getElementById('h-cider').style.width = state.needs.cider + '%';
+    document.getElementById('h-faith').style.width = state.needs.faith + '%';
+    document.getElementById('h-mood').style.width = state.needs.mood + '%';
 }
 
-function setSpeed(s) {
-    state.speed = s;
-    document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
-    const map = { 0: null, 1: 'sp1', 2: 'sp2', 4: 'sp4' };
-    if (map[s]) document.getElementById(map[s]).classList.add('active');
+function showEnding() {
+    // Определяем концовку по флагам и потребностям
+    let endingTitle = 'КОНЕЦ';
+    let endingText = '';
+
+    const avgMood = (state.needs.mood + state.needs.faith) / 2;
+
+    if (state.flags.hopeful && state.flags.prayed && avgMood > 70) {
+        endingTitle = '～ Светлая дорога ～';
+        endingText = 'Ибрагим нашёл в себе силы. Вера, надежда, и что-то большее. Он не сдался. Он идёт вперёд — и этот путь только начинается.';
+    } else if (state.flags.warning && state.needs.mood < 40) {
+        endingTitle = '～ Туман ～';
+        endingText = 'Ибрагим устал. Работа, дорога, одиночество. Всё слилось в один серый день. Но он дышит. И это значит — ещё не конец.';
+    } else if (state.flags.called_mom && state.needs.mood > 60) {
+        endingTitle = '～ Тёплый вечер ～';
+        endingText = 'Голос мамы. Сидр на балконе. Закат над городом. Ибрагим понял: счастье — в мелочах. И он улыбнулся.';
+    } else {
+        endingTitle = '～ Бесконечная дорога ～';
+        endingText = 'Утро. Дорога. Туман. Ибрагим стоит на обочине. Жизнь продолжается. И это — уже немало.';
+    }
+
+    document.getElementById('end-title').textContent = endingTitle;
+    document.getElementById('end-text').textContent = endingText;
+    document.getElementById('end-screen').classList.add('show');
 }
 
-// ==== ЦИКЛ ====
-let lastTime = performance.now();
-function loop(now) {
-    const dt = Math.min((now - lastTime) / 1000, 0.1);
-    lastTime = now;
-    update(dt);
-    draw();
+// ============================================================
+// УПРАВЛЕНИЕ
+// ============================================================
+
+document.getElementById('dialogue-box').addEventListener('click', nextLine);
+
+document.addEventListener('keydown', e => {
+    if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        if (document.querySelectorAll('.choice-btn').length === 0) {
+            nextLine();
+        }
+    }
+});
+
+// Пыль в воздухе
+setInterval(() => {
+    const dust = document.createElement('div');
+    dust.className = 'dust';
+    dust.style.left = Math.random() * 100 + '%';
+    dust.style.top = '100%';
+    dust.style.animationDuration = (5 + Math.random() * 8) + 's';
+    document.getElementById('game').appendChild(dust);
+    setTimeout(() => dust.remove(), 10000);
+}, 800);
+
+// Стартовая подсказка
+setTimeout(() => {
     updateHUD();
-    requestAnimationFrame(loop);
-}
-
-updateHUD();
-requestAnimationFrame(loop);
+}, 100);
 
 </script>
 
