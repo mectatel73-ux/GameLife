@@ -2,631 +2,875 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>День из жизни Ибрагима</title>
+<title>Жизнь Ибрагима — изометрия</title>
 <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-        font-family: 'Courier New', monospace;
-        background: #0f0f14;
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+        background: #1a1410;
         color: #e0e0e0;
         overflow: hidden;
         height: 100vh;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
     }
     #game-wrap {
         position: relative;
-        background: #1a1a24;
-        border: 3px solid #2a2a3a;
-        border-radius: 8px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 100px rgba(100,80,200,0.1);
+        background: #0f0b08;
+        border-radius: 12px;
+        box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 120px rgba(255,180,100,0.08);
+        overflow: hidden;
     }
     canvas {
         display: block;
         image-rendering: pixelated;
-        image-rendering: crisp-edges;
-        border-radius: 5px;
     }
-    #hud {
+
+    /* ==== ПРАВАЯ ПАНЕЛЬ HUD ==== */
+    #right-hud {
         position: absolute;
-        top: 8px;
-        left: 8px;
-        right: 8px;
-        display: flex;
-        justify-content: space-between;
-        pointer-events: none;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-    .hud-block {
-        background: rgba(0,0,0,0.75);
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: bold;
-        letter-spacing: 0.5px;
-    }
-    .name-tag {
-        color: #ffd966;
+        top: 16px;
+        right: 16px;
+        width: 240px;
+        background: linear-gradient(180deg, rgba(20,30,50,0.95) 0%, rgba(10,15,30,0.95) 100%);
+        border: 2px solid #2a3a5c;
+        border-radius: 12px;
+        padding: 12px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.6);
         font-size: 13px;
     }
-    .needs {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-    }
-    .need {
+    .avatar-row {
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: 10px;
+        margin-bottom: 10px;
     }
-    .need-bar {
-        width: 44px;
-        height: 8px;
-        background: rgba(255,255,255,0.15);
-        border-radius: 4px;
+    .avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 30% 30%, #ffd966 0%, #c88e2a 100%);
+        border: 2px solid #ffd966;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        box-shadow: 0 0 20px rgba(255,217,102,0.4);
+    }
+    .avatar-info { flex: 1; }
+    .avatar-name { font-weight: bold; color: #fff; font-size: 14px; }
+    .avatar-level { color: #ffd966; font-size: 11px; }
+    .xp-bar {
+        width: 100%;
+        height: 6px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 3px;
+        margin-top: 4px;
         overflow: hidden;
     }
-    .need-bar-fill {
+    .xp-bar-fill {
         height: 100%;
-        transition: width 0.3s;
+        background: linear-gradient(90deg, #ffd966, #ff8a3d);
+        width: 62%;
     }
-    .time-block {
-        font-size: 13px;
+    .date-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 0;
+        border-top: 1px solid #2a3a5c;
+        border-bottom: 1px solid #2a3a5c;
+        margin-bottom: 8px;
     }
-    #hint {
-        margin-top: 12px;
+    .date-text { color: #b0c0e0; font-size: 12px; }
+    .time-controls { display: flex; gap: 4px; }
+    .time-btn {
+        background: #2a3a5c;
+        border: none;
+        color: #b0c0e0;
+        width: 22px;
+        height: 22px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 11px;
+        transition: 0.15s;
+    }
+    .time-btn:hover { background: #3a4a7c; color: white; }
+    .time-btn.active { background: #ffd966; color: #1a1410; }
+
+    .stats { display: flex; flex-direction: column; gap: 4px; }
+    .stat-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 4px 8px;
+        background: rgba(255,255,255,0.04);
+        border-radius: 5px;
+    }
+    .stat-label { color: #8a9ac0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-value { color: #fff; font-weight: bold; font-size: 13px; }
+    .stat-value.money { color: #4dff88; }
+    .stat-value.followers { color: #ff8ac0; }
+    .stat-value.subs { color: #7cc4ff; }
+
+    /* Иконки соцсетей / бейджи */
+    .badges {
+        display: flex;
+        gap: 6px;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #2a3a5c;
+        justify-content: center;
+    }
+    .badge {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        border: 2px solid;
+        cursor: pointer;
+        transition: 0.15s;
+    }
+    .badge.vip { background: rgba(200,80,200,0.2); border-color: #c850c8; }
+    .badge.web { background: rgba(80,180,255,0.2); border-color: #50b4ff; }
+    .badge.music { background: rgba(100,255,150,0.2); border-color: #64ff96; }
+    .badge.cookie { background: rgba(255,180,80,0.2); border-color: #ffb450; }
+    .badge.rec { background: rgba(255,80,80,0.2); border-color: #ff5050; }
+    .badge:hover { transform: scale(1.1); }
+
+    /* ==== НИЖНЯЯ ПАНЕЛЬ ==== */
+    #bottom-bar {
+        position: absolute;
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        padding: 10px 16px;
+        background: linear-gradient(180deg, rgba(20,30,50,0.95) 0%, rgba(10,15,30,0.95) 100%);
+        border: 2px solid #2a3a5c;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+    }
+    .tool-btn {
+        width: 48px;
+        height: 48px;
+        border-radius: 10px;
+        background: linear-gradient(180deg, #3a4a7c 0%, #2a3a5c 100%);
+        border: 2px solid #4a5a8c;
+        color: #c0d0ff;
+        font-size: 22px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.15s;
+        position: relative;
+    }
+    .tool-btn:hover {
+        background: linear-gradient(180deg, #4a5a9c 0%, #3a4a7c 100%);
+        border-color: #6a7aac;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(80,120,255,0.3);
+    }
+    .tool-btn .label {
+        position: absolute;
+        bottom: -16px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 9px;
+        color: #8a9ac0;
+        white-space: nowrap;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* ==== ЛЕВЫЙ ВЕРХНИЙ HUD — потребности ==== */
+    #left-hud {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 12px;
+        background: rgba(10,15,30,0.85);
+        border: 2px solid #2a3a5c;
+        border-radius: 12px;
+        width: 200px;
+    }
+    .need-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
         font-size: 12px;
-        color: #6a6a7a;
-        text-align: center;
-        letter-spacing: 1px;
+    }
+    .need-icon { font-size: 16px; width: 20px; text-align: center; }
+    .need-bar {
+        flex: 1;
+        height: 10px;
+        background: rgba(0,0,0,0.4);
+        border-radius: 5px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .need-fill {
+        height: 100%;
+        transition: width 0.4s;
+        border-radius: 4px;
+    }
+
+    /* ==== ПОДСКАЗКА СНИЗУ ==== */
+    #hint {
+        position: absolute;
+        bottom: 90px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 6px 16px;
+        background: rgba(0,0,0,0.7);
+        border-radius: 8px;
+        font-size: 11px;
+        color: #8a9ac0;
+        letter-spacing: 0.5px;
     }
     #hint kbd {
-        background: #2a2a3a;
-        color: #b0b0c0;
+        background: #2a3a5c;
+        color: #c0d0ff;
         padding: 2px 6px;
         border-radius: 4px;
         font-family: inherit;
     }
+
+    /* ==== УВЕДОМЛЕНИЕ ==== */
+    #notification {
+        position: absolute;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 10px 24px;
+        background: rgba(0,0,0,0.85);
+        border: 2px solid #ffd966;
+        border-radius: 10px;
+        color: #ffd966;
+        font-size: 14px;
+        font-weight: bold;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+    }
+    #notification.show { opacity: 1; }
 </style>
 </head>
 <body>
 
 <div id="game-wrap">
-    <canvas id="game" width="960" height="640"></canvas>
-    <div id="hud">
-        <div class="needs">
-            <div class="need hud-block">🍔 <div class="need-bar"><div class="need-bar-fill" id="need-food"></div></div></div>
-            <div class="need hud-block">😴 <div class="need-bar"><div class="need-bar-fill" id="need-sleep"></div></div></div>
-            <div class="need hud-block">🚿 <div class="need-bar"><div class="need-bar-fill" id="need-hygiene"></div></div></div>
-            <div class="need hud-block">🚬 <div class="need-bar"><div class="need-bar-fill" id="need-nicotine"></div></div></div>
-            <div class="need hud-block">🍺 <div class="need-bar"><div class="need-bar-fill" id="need-cider"></div></div></div>
-            <div class="need hud-block">🕌 <div class="need-bar"><div class="need-bar-fill" id="need-faith"></div></div></div>
-            <div class="need hud-block">✨ <div class="need-bar"><div class="need-bar-fill" id="need-mood"></div></div></div>
-        </div>
-        <div class="hud-block time-block" id="clock">07:00</div>
-    </div>
-</div>
+    <canvas id="game" width="1280" height="720"></canvas>
 
-<div id="hint">
-    <kbd>W A S D</kbd> или <kbd>← ↑ → ↓</kbd> — ходить &nbsp;·&nbsp; <kbd>E</kbd> — взаимодействовать &nbsp;·&nbsp; <kbd>ESC</kbd> — сброс
+    <!-- ЛЕВЫЙ HUD — потребности -->
+    <div id="left-hud">
+        <div class="need-row"><span class="need-icon">🍔</span><div class="need-bar"><div class="need-fill" id="n-food" style="background:#ff6b6b"></div></div></div>
+        <div class="need-row"><span class="need-icon">😴</span><div class="need-bar"><div class="need-fill" id="n-sleep" style="background:#4dabf7"></div></div></div>
+        <div class="need-row"><span class="need-icon">🚿</span><div class="need-bar"><div class="need-fill" id="n-hygiene" style="background:#63e6be"></div></div></div>
+        <div class="need-row"><span class="need-icon">🚬</span><div class="need-bar"><div class="need-fill" id="n-nicotine" style="background:#adb5bd"></div></div></div>
+        <div class="need-row"><span class="need-icon">🍺</span><div class="need-bar"><div class="need-fill" id="n-cider" style="background:#ffa94d"></div></div></div>
+        <div class="need-row"><span class="need-icon">🕌</span><div class="need-bar"><div class="need-fill" id="n-faith" style="background:#b197fc"></div></div></div>
+        <div class="need-row"><span class="need-icon">✨</span><div class="need-bar"><div class="need-fill" id="n-mood" style="background:#ffd43b"></div></div></div>
+    </div>
+
+    <!-- ПРАВЫЙ HUD — уровень, дата, деньги -->
+    <div id="right-hud">
+        <div class="avatar-row">
+            <div class="avatar">🧑</div>
+            <div class="avatar-info">
+                <div class="avatar-name">Ибрагим</div>
+                <div class="avatar-level">Уровень 16</div>
+                <div class="xp-bar"><div class="xp-bar-fill"></div></div>
+            </div>
+        </div>
+
+        <div class="date-row">
+            <span class="date-text" id="date-text">14 окт, Пн</span>
+            <div class="time-controls">
+                <button class="time-btn" onclick="setSpeed(0)">⏸</button>
+                <button class="time-btn active" id="sp1" onclick="setSpeed(1)">▶</button>
+                <button class="time-btn" id="sp2" onclick="setSpeed(2)">▶▶</button>
+                <button class="time-btn" id="sp4" onclick="setSpeed(4)">▶▶▶</button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-row"><span class="stat-label">Cash</span><span class="stat-value money" id="stat-money">₽ 17 917</span></div>
+            <div class="stat-row"><span class="stat-label">Онлайн</span><span class="stat-value" id="stat-online">1 385</span></div>
+            <div class="stat-row"><span class="stat-label">Подписчики</span><span class="stat-value followers" id="stat-followers">40 483</span></div>
+            <div class="stat-row"><span class="stat-label">Сабы</span><span class="stat-value subs" id="stat-subs">613</span></div>
+            <div class="stat-row"><span class="stat-label">Жанр</span><span class="stat-value">MOBA</span></div>
+        </div>
+
+        <div class="badges">
+            <div class="badge vip" title="VIP">👑</div>
+            <div class="badge web" title="Сайт">🖥️</div>
+            <div class="badge music" title="Музыка">🎵</div>
+            <div class="badge cookie" title="Донат">🍪</div>
+            <div class="badge rec" title="Стрим">⏺</div>
+        </div>
+    </div>
+
+    <!-- НИЖНЯЯ ПАНЕЛЬ -->
+    <div id="bottom-bar">
+        <button class="tool-btn" title="Инвентарь">📋<span class="label">Вещи</span></button>
+        <button class="tool-btn" title="Магазин">🛒<span class="label">Магазин</span></button>
+        <button class="tool-btn" title="Шкаф">🗄️<span class="label">Шкаф</span></button>
+        <button class="tool-btn" title="Химия">⚗️<span class="label">Наука</span></button>
+        <button class="tool-btn" title="Внешний вид">👤<span class="label">Стиль</span></button>
+        <button class="tool-btn" title="Настройки">⚙️<span class="label">Настройки</span></button>
+        <button class="tool-btn" title="Достижения">🏆<span class="label">Награды</span></button>
+    </div>
+
+    <div id="hint"><kbd>WASD</kbd> — ходить · <kbd>E</kbd> — действие · <kbd>ESC</kbd> — сброс</div>
+
+    <div id="notification"></div>
 </div>
 
 <script>
 // ============================================================
-// ИГРА: ДЕНЬ ИЗ ЖИЗНИ ИБРАГИМА
+// ИЗОМЕТРИЧЕСКАЯ ИГРА — ЖИЗНЬ ИБРАГИМА
 // ============================================================
 
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-ctx.imageSmoothingEnabled = false;
 
 const W = canvas.width;
 const H = canvas.height;
 
-// === Игровое время ===
-let gameTime = 7 * 60;
-const MINUTES_PER_REAL_SEC = 20;
+// ==== ИЗОМЕТРИЧЕСКАЯ ПРОЕКЦИЯ ====
+// Размер тайла
+const TILE_W = 64;
+const TILE_H = 32;
 
-let lastFrameTime = performance.now();
-let dayCount = 1;
+// Мировые координаты → экранные изометрические
+function iso(wx, wy, wz = 0) {
+    const sx = (wx - wy) * (TILE_W / 2);
+    const sy = (wx + wy) * (TILE_H / 2) - wz;
+    return { x: sx, y: sy };
+}
 
-// === Персонаж — Ибрагим ===
+// Смещение сцены в центр
+const CAM_OFFSET_X = W / 2 - 80; // немного влево, чтобы компенсировать HUD
+const CAM_OFFSET_Y = H / 2 + 40;
+
+function worldToScreen(wx, wy, wz = 0) {
+    const p = iso(wx, wy, wz);
+    return { x: p.x + CAM_OFFSET_X, y: p.y + CAM_OFFSET_Y };
+}
+
+// ==== СОСТОЯНИЕ ====
+const state = {
+    speed: 1,          // множитель времени
+    gameTime: 9 + 15/60, // часы (9:15)
+    day: 1,
+    month: 10,
+    year: 2026,
+    money: 17917,
+    online: 1385,
+    followers: 40483,
+    subs: 613,
+    level: 16,
+    xp: 62,
+    needs: {
+        food: 70, sleep: 80, hygiene: 75,
+        nicotine: 60, cider: 50, faith: 80, mood: 70
+    },
+    thought: 'Ибрагим, пора вставать...',
+    thoughtTimer: 0,
+    action: null,
+    actionTime: 0
+};
+
+// ==== ИГРОК ====
 const player = {
-    name: 'Ибрагим',
-    x: 480, y: 320,
-    w: 24, h: 32,
-    speed: 140,
+    wx: 8, wy: 10, wz: 0,   // мировые координаты
+    speed: 3.2,             // тайлов/сек
     dir: 'down',
     animFrame: 0,
     animTime: 0,
-    isMoving: false,
-    needs: {
-        food: 70,
-        sleep: 80,
-        hygiene: 75,
-        nicotine: 60,
-        cider: 50,
-        faith: 80,
-        mood: 70
-    },
-    action: null,
-    actionTime: 0,
-    thought: 'Ибрагим, пора вставать...',
-    thoughtTime: 0
+    isMoving: false
 };
 
-// === Карта квартиры ===
-const rooms = [
-    { x: 40,  y: 40,  w: 280, h: 220, name: 'Спальня',   color: '#2d2438', accent: '#4a3a5c' },
-    { x: 340, y: 40,  w: 280, h: 220, name: 'Кухня',     color: '#2d3838', accent: '#4a5c5c' },
-    { x: 640, y: 40,  w: 280, h: 220, name: 'Гостиная',  color: '#38302d', accent: '#5c4a3a' },
-    { x: 40,  y: 280, w: 280, h: 220, name: 'Ванная',    color: '#243038', accent: '#3a4c5c' },
-    { x: 340, y: 280, w: 280, h: 220, name: 'Прихожая',  color: '#302d38', accent: '#4c3a5c' },
-    { x: 640, y: 280, w: 280, h: 220, name: 'Балкон',    color: '#1a1a2a', accent: '#3a3a5c', isBalcony: true }
-];
-
-// === Объекты ===
+// ==== ОБЪЕКТЫ В КОМНАТЕ ====
+// Каждый: {wx, wy, w (в тайлах), h (в тайлах), цвет, тип, метка}
 const objects = [
-    // Спальня
-    { x: 100, y: 100, w: 50, h: 70, id: 'bed',    room: 0, icon: '🛏️', label: 'Спать',         action: 'sleep' },
-    { x: 220, y: 90,  w: 40, h: 50, id: 'wardrobe',room: 0, icon: '🚪', label: 'Одеваться',    action: 'dress' },
-    { x: 260, y: 200, w: 40, h: 40, id: 'quran',  room: 0, icon: '📖', label: 'Читать намаз', action: 'pray' },
+    // Шкаф (большой, слева)
+    { wx: 3, wy: 3, w: 3, h: 2, baseColor: '#8b5a2b', topColor: '#a06a3b', sideColor: '#6b4218', h3d: 130, icon: '🗄️', label: 'Шкаф', action: 'dress', walkable: false },
 
-    // Кухня
-    { x: 400, y: 90,  w: 50, h: 50, id: 'stove',  room: 1, icon: '🍳', label: 'Готовить',      action: 'cook' },
-    { x: 480, y: 90,  w: 50, h: 60, id: 'fridge', room: 1, icon: '🧊', label: 'Поесть',        action: 'eat' },
-    { x: 560, y: 200, w: 40, h: 40, id: 'cider',  room: 1, icon: '🍺', label: 'Выпить сидр',   action: 'cider' },
+    // Кровать (справа)
+    { wx: 14, wy: 12, w: 4, h: 3, baseColor: '#4a3a6a', topColor: '#6a4a8a', sideColor: '#2a1a4a', h3d: 40, icon: '🛏️', label: 'Спать', action: 'sleep', walkable: false },
 
-    // Гостиная
-    { x: 700, y: 90,  w: 60, h: 50, id: 'sofa',   room: 2, icon: '🛋️', label: 'Отдохнуть',    action: 'rest' },
-    { x: 800, y: 90,  w: 50, h: 50, id: 'tv',     room: 2, icon: '📺', label: 'Смотреть ТВ',  action: 'tv' },
-    { x: 700, y: 200, w: 50, h: 40, id: 'pc',     room: 2, icon: '💻', label: 'Работать',      action: 'work' },
+    // Стол с компьютером
+    { wx: 8, wy: 8, w: 3, h: 2, baseColor: '#7a4a2a', topColor: '#9a5a3a', sideColor: '#5a3a1a', h3d: 60, icon: '💻', label: 'Работать', action: 'work', walkable: false },
 
-    // Ванная
-    { x: 100, y: 340, w: 60, h: 60, id: 'shower', room: 3, icon: '🚿', label: 'Душ',           action: 'shower' },
-    { x: 220, y: 340, w: 40, h: 50, id: 'sink',   room: 3, icon: '🪞', label: 'Умыться',       action: 'wash' },
+    // Системный блок
+    { wx: 7, wy: 10, w: 1, h: 1, baseColor: '#2a2a3a', topColor: '#3a3a4a', sideColor: '#1a1a2a', h3d: 70, icon: '🖥️', label: '', action: null, walkable: false },
 
-    // Прихожая
-    { x: 420, y: 400, w: 60, h: 60, id: 'exit',   room: 4, icon: '🚪', label: 'На склад',      action: 'work_out' },
+    // Стул
+    { wx: 9, wy: 11, w: 1, h: 1, baseColor: '#1a1a1a', topColor: '#2a2a2a', sideColor: '#0a0a0a', h3d: 50, icon: '🪑', label: '', action: null, walkable: false },
 
-    // Балкон
-    { x: 700, y: 340, w: 40, h: 40, id: 'smoke',  room: 5, icon: '🚬', label: 'Покурить',      action: 'smoke' },
-    { x: 820, y: 340, w: 60, h: 50, id: 'sunset', room: 5, icon: '🌅', label: 'Полюбоваться',  action: 'look' }
+    // Вентилятор
+    { wx: 5, wy: 11, w: 1, h: 1, baseColor: '#4a5a7a', topColor: '#5a6a8a', sideColor: '#3a4a6a', h3d: 90, icon: '🌀', label: '', action: null, walkable: false },
+
+    // Тумбочка
+    { wx: 13, wy: 9, w: 1, h: 1, baseColor: '#8a5a3a', topColor: '#a06a4a', sideColor: '#6a4218', h3d: 50, icon: '📦', label: 'Взять', action: 'pickup', walkable: false },
+
+    // Сумка (на полу)
+    { wx: 4, wy: 13, w: 1, h: 1, baseColor: '#1a1a2a', topColor: '#2a2a3a', sideColor: '#0a0a1a', h3d: 20, icon: '🎒', label: 'Взять', action: 'pickup', walkable: true },
+
+    // Кулер
+    { wx: 6, wy: 6, w: 1, h: 1, baseColor: '#c8d0d8', topColor: '#e0e8f0', sideColor: '#a0a8b0', h3d: 80, icon: '💧', label: 'Попить', action: 'drink', walkable: false },
+
+    // Полка с книгами
+    { wx: 12, wy: 6, w: 2, h: 1, baseColor: '#8a5a3a', topColor: '#a06a4a', sideColor: '#6a4218', h3d: 40, icon: '📚', label: 'Читать намаз', action: 'pray', walkable: false },
+
+    // Окно (на стене)
+    { wx: 16, wy: 7, w: 2, h: 1, baseColor: '#4a90c8', topColor: '#6ab0e8', sideColor: '#2a70a8', h3d: 140, icon: '🪟', label: '', action: null, walkable: false }
 ];
 
-let keys = {};
-let particles = [];
-let nearestObject = null;
+// ==== СТЕНЫ (задние) ====
+const walls = [
+    // Задняя стена (Z=0)
+    { wx: 2, wy: 2, w: 16, h: 1, color: '#c8b890', side: '#a89870' },
+    // Левая стена
+    { wx: 2, wy: 2, w: 1, h: 16, color: '#b8a880', side: '#988860' }
+];
 
-let eventBanner = null;
-let eventBannerTime = 0;
+// ==== ПОЛ ====
+const floorTiles = [];
+for (let x = 3; x < 18; x++) {
+    for (let y = 3; y < 18; y++) {
+        floorTiles.push({ wx: x, wy: y });
+    }
+}
+
+// Ковёр (синий)
+const carpetTiles = [];
+for (let x = 6; x < 12; x++) {
+    for (let y = 7; y < 14; y++) {
+        carpetTiles.push({ wx: x, wy: y });
+    }
+}
+
+// ============================================================
+// ВВОД
+// ============================================================
+const keys = {};
+
+window.addEventListener('keydown', e => {
+    const k = e.key.toLowerCase();
+    keys[k] = true;
+    if (k === 'e') tryInteract();
+    if (k === 'escape') location.reload();
+    if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(k)) e.preventDefault();
+});
+window.addEventListener('keyup', e => {
+    keys[e.key.toLowerCase()] = false;
+});
 
 // ============================================================
 // ЛОГИКА
 // ============================================================
+function tryInteract() {
+    if (state.action) return;
+    // Находим ближайший объект
+    let nearest = null;
+    let minDist = 2.5;
+    objects.forEach(obj => {
+        if (!obj.action) return;
+        const cx = obj.wx + obj.w / 2;
+        const cy = obj.wy + obj.h / 2;
+        const d = Math.hypot(player.wx - cx, player.wy - cy);
+        if (d < minDist) { minDist = d; nearest = obj; }
+    });
+    if (!nearest) return;
+
+    state.action = nearest.action;
+    state.actionTime = getActionDuration(nearest.action);
+    showNotification(nearest.icon + ' ' + nearest.label);
+}
+
+function getActionDuration(a) {
+    return { sleep: 8, work: 6, pray: 3, drink: 2, pickup: 1, dress: 2 }[a] || 3;
+}
+
+function finishAction() {
+    const a = state.action;
+    const n = state.needs;
+    if (a === 'sleep')   { n.sleep = Math.min(100, n.sleep + 50); n.mood += 5; }
+    if (a === 'work')    { state.money += Math.round(500 + Math.random() * 1500); n.mood -= 5; n.food -= 10; state.followers += Math.round(50 + Math.random() * 200); }
+    if (a === 'pray')    { n.faith = Math.min(100, n.faith + 50); n.mood = Math.min(100, n.mood + 15); showNotification('🕌 Намаз прочитан'); }
+    if (a === 'drink')   { n.hygiene += 5; n.mood += 2; }
+    if (a === 'pickup')  { n.mood += 3; }
+    if (a === 'dress')   { n.mood += 2; }
+    state.action = null;
+    updateHUD();
+}
+
+function showNotification(text) {
+    const el = document.getElementById('notification');
+    el.textContent = text;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+function updateNeeds(dt) {
+    const factor = dt * 0.15;
+    state.needs.food = Math.max(0, state.needs.food - factor * 0.4);
+    state.needs.sleep = Math.max(0, state.needs.sleep - factor * 0.3);
+    state.needs.hygiene = Math.max(0, state.needs.hygiene - factor * 0.2);
+    state.needs.nicotine = Math.max(0, state.needs.nicotine - factor * 0.5);
+    state.needs.cider = Math.max(0, state.needs.cider - factor * 0.3);
+    const avg = (state.needs.food + state.needs.sleep + state.needs.hygiene + state.needs.nicotine + state.needs.cider + state.needs.faith) / 6;
+    state.needs.mood = Math.max(0, Math.min(100, state.needs.mood * 0.995 + avg * 0.005));
+}
+
+function generateThought() {
+    const n = state.needs;
+    const t = [];
+    if (n.food < 30) t.push('Ибрагим, есть хочу...');
+    if (n.sleep < 30) t.push('Спать бы...');
+    if (n.nicotine < 30) t.push('Покурить бы...');
+    if (n.cider < 30) t.push('Сидр бы сейчас...');
+    if (n.faith < 40) t.push('Намаз надо...');
+    if (n.mood < 30) t.push('Грустно что-то...');
+    if (t.length === 0) {
+        const idle = ['Хорошо...', 'Спокойно.', 'Закат красивый.', 'Стрим сегодня?', 'Стараюсь быть лучше.', 'Подписчиков растёт!'];
+        return idle[Math.floor(Math.random() * idle.length)];
+    }
+    return t[Math.floor(Math.random() * t.length)];
+}
+
+// ============================================================
+// ОБНОВЛЕНИЕ
+// ============================================================
+let lastTime = performance.now();
 
 function update(dt) {
-    gameTime += MINUTES_PER_REAL_SEC * dt;
-    if (gameTime >= 24 * 60) {
-        gameTime -= 24 * 60;
-        dayCount++;
-        showEvent('🌅 Новый день #' + dayCount + ' у Ибрагима', 4);
+    const sdt = dt * state.speed;
+
+    // Время
+    state.gameTime += sdt / 60 * 4; // 4 игровых минуты в реальную секунду
+    if (state.gameTime >= 24) { state.gameTime -= 24; state.day++; }
+
+    // Потребности
+    updateNeeds(sdt);
+
+    // Мысли
+    state.thoughtTimer -= sdt;
+    if (state.thoughtTimer <= 0) {
+        state.thoughtTimer = 6 + Math.random() * 4;
+        state.thought = generateThought();
     }
 
-    const timeFactor = dt * 0.5;
-    player.needs.food = Math.max(0, player.needs.food - timeFactor * 0.4);
-    player.needs.hygiene = Math.max(0, player.needs.hygiene - timeFactor * 0.2);
-    player.needs.nicotine = Math.max(0, player.needs.nicotine - timeFactor * 0.5);
-    player.needs.cider = Math.max(0, player.needs.cider - timeFactor * 0.3);
-    player.needs.sleep = Math.max(0, player.needs.sleep - timeFactor * 0.3);
-
-    const avgNeeds = (player.needs.food + player.needs.sleep + player.needs.hygiene + player.needs.nicotine + player.needs.cider + player.needs.faith) / 6;
-    player.needs.mood = player.needs.mood * 0.98 + avgNeeds * 0.02;
-    player.needs.mood = Math.max(0, Math.min(100, player.needs.mood));
-
-    player.thoughtTime -= dt;
-    if (player.thoughtTime <= 0) {
-        player.thoughtTime = 5 + Math.random() * 4;
-        player.thought = generateThought();
-    }
-
-    if (!player.action) {
+    // Действие
+    if (state.action) {
+        state.actionTime -= sdt;
+        if (state.actionTime <= 0) finishAction();
+    } else {
+        // Движение
         let dx = 0, dy = 0;
-        if (keys['w'] || keys['arrowup']) dy -= 1;
-        if (keys['s'] || keys['arrowdown']) dy += 1;
-        if (keys['a'] || keys['arrowleft']) dx -= 1;
-        if (keys['d'] || keys['arrowright']) dx += 1;
-
+        if (keys['w']) dy -= 1;
+        if (keys['s']) dy += 1;
+        if (keys['a']) dx -= 1;
+        if (keys['d']) dx += 1;
         if (dx || dy) {
             const len = Math.hypot(dx, dy);
             dx /= len; dy /= len;
-            player.x += dx * player.speed * dt;
-            player.y += dy * player.speed * dt;
+            player.wx += dx * player.speed * sdt;
+            player.wy += dy * player.speed * sdt;
             player.isMoving = true;
-            player.animTime += dt;
+            player.animTime += sdt;
             if (player.animTime > 0.15) { player.animFrame = (player.animFrame + 1) % 4; player.animTime = 0; }
-            if (Math.abs(dx) > Math.abs(dy)) player.dir = dx > 0 ? 'right' : 'left';
-            else player.dir = dy > 0 ? 'down' : 'up';
+            if (Math.abs(dx) > Math.abs(dy)) player.dir = dx > 0 ? 'se' : 'nw';
+            else player.dir = dy > 0 ? 'sw' : 'ne';
         } else {
             player.isMoving = false;
             player.animFrame = 0;
         }
-        player.x = Math.max(20, Math.min(W - 20, player.x));
-        player.y = Math.max(20, Math.min(H - 20, player.y));
-    } else {
-        player.actionTime -= dt;
-        if (player.actionTime <= 0) finishAction();
+        // Границы
+        player.wx = Math.max(3, Math.min(17, player.wx));
+        player.wy = Math.max(3, Math.min(17, player.wy));
     }
-
-    nearestObject = null;
-    let minDist = 60;
-    objects.forEach(obj => {
-        const objCx = obj.x + obj.w / 2;
-        const objCy = obj.y + obj.h / 2;
-        const dist = Math.hypot(player.x - objCx, player.y - objCy);
-        if (dist < minDist) { minDist = dist; nearestObject = obj; }
-    });
-
-    particles = particles.filter(p => {
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-        p.life -= dt;
-        p.vy += p.gravity * dt;
-        return p.life > 0;
-    });
-
-    if (player.action && (player.action === 'smoke' || player.action === 'shower')) {
-        if (Math.random() < 0.3) {
-            particles.push({
-                x: player.x + (Math.random() - 0.5) * 20,
-                y: player.y - 20,
-                vx: (Math.random() - 0.5) * 20,
-                vy: -30 - Math.random() * 20,
-                gravity: -10,
-                life: 1.5,
-                maxLife: 1.5,
-                color: player.action === 'smoke' ? 'rgba(180,180,200,' : 'rgba(150,200,255,',
-                size: 4 + Math.random() * 4
-            });
-        }
-    }
-
-    if (eventBannerTime > 0) {
-        eventBannerTime -= dt;
-        if (eventBannerTime <= 0) eventBanner = null;
-    }
-}
-
-function generateThought() {
-    const n = player.needs;
-    const thoughts = [];
-    if (n.food < 30) thoughts.push('Ибрагим, есть хочу...');
-    if (n.sleep < 30) thoughts.push('Спать бы...');
-    if (n.hygiene < 30) thoughts.push('В душ бы...');
-    if (n.nicotine < 30) thoughts.push('Покурить хочется...');
-    if (n.cider < 30) thoughts.push('Сидр бы сейчас...');
-    if (n.faith < 40) thoughts.push('Надо бы намаз прочитать...');
-    if (n.mood < 30) thoughts.push('Что-то грустно...');
-
-    if (thoughts.length === 0) {
-        const idle = [
-            'Хорошо...',
-            'Спокойно.',
-            'Закат красивый.',
-            'Завтра на склад...',
-            'Стараюсь быть лучше.',
-            'Ибрагим, ты справишься.',
-            'Жизнь — сложная штука.',
-            'Может, сидр?',
-            'Пора намаз читать...',
-            'Главное — не сдаваться.'
-        ];
-        return idle[Math.floor(Math.random() * idle.length)];
-    }
-    return thoughts[Math.floor(Math.random() * thoughts.length)];
-}
-
-function showEvent(text, duration = 3) {
-    eventBanner = text;
-    eventBannerTime = duration;
-}
-
-function tryInteract() {
-    if (!nearestObject || player.action) return;
-    const action = nearestObject.action;
-    player.action = action;
-    player.actionTime = getActionDuration(action);
-    player.x = nearestObject.x + nearestObject.w / 2;
-    player.y = nearestObject.y + nearestObject.h + 20;
-    player.dir = 'up';
-    showEvent(nearestObject.icon + ' ' + nearestObject.label + '...', player.actionTime);
-}
-
-function getActionDuration(action) {
-    const map = {
-        sleep: 8, eat: 3, cook: 4, shower: 3, wash: 2,
-        smoke: 4, cider: 3, pray: 3, tv: 5, work: 6,
-        work_out: 8, rest: 4, dress: 2, look: 4
-    };
-    return map[action] || 3;
-}
-
-function finishAction() {
-    const n = player.needs;
-    const a = player.action;
-
-    if (a === 'sleep') { n.sleep = Math.min(100, n.sleep + 50); n.mood = Math.min(100, n.mood + 5); }
-    if (a === 'eat') { n.food = Math.min(100, n.food + 45); }
-    if (a === 'cook') { n.food = Math.min(100, n.food + 30); n.mood = Math.min(100, n.mood + 3); }
-    if (a === 'shower') { n.hygiene = Math.min(100, n.hygiene + 60); n.mood = Math.min(100, n.mood + 5); }
-    if (a === 'wash') { n.hygiene = Math.min(100, n.hygiene + 25); }
-    if (a === 'smoke') { n.nicotine = Math.min(100, n.nicotine + 50); n.mood = Math.min(100, n.mood + 5); n.hygiene = Math.max(0, n.hygiene - 5); }
-    if (a === 'cider') { n.cider = Math.min(100, n.cider + 60); n.mood = Math.min(100, n.mood + 10); }
-    if (a === 'pray') {
-        n.faith = Math.min(100, n.faith + 50);
-        n.mood = Math.min(100, n.mood + 15);
-        showEvent('🕌 Ибрагим прочитал намаз', 3);
-    }
-    if (a === 'tv') { n.mood = Math.min(100, n.mood + 8); n.sleep = Math.max(0, n.sleep - 5); }
-    if (a === 'work') { n.mood = Math.max(0, n.mood - 5); n.sleep = Math.max(0, n.sleep - 15); n.food = Math.max(0, n.food - 10); }
-    if (a === 'work_out') {
-        n.mood = Math.max(0, n.mood - 15);
-        n.food = Math.max(0, n.food - 30);
-        n.sleep = Math.max(0, n.sleep - 25);
-        n.hygiene = Math.max(0, n.hygiene - 20);
-        gameTime += 8 * 60;
-        showEvent('🚚 Ибрагим вернулся со склада. Устал...', 4);
-    }
-    if (a === 'rest') { n.mood = Math.min(100, n.mood + 10); n.sleep = Math.min(100, n.sleep + 10); }
-    if (a === 'look') { n.mood = Math.min(100, n.mood + 20); }
-
-    player.action = null;
 }
 
 // ============================================================
 // РЕНДЕР
 // ============================================================
+function drawTile(x, y, wz = 0, colorTop, colorSide, h = 0) {
+    // Верхняя грань (ромб)
+    const p0 = worldToScreen(x, y, wz + h);
+    const p1 = worldToScreen(x + 1, y, wz + h);
+    const p2 = worldToScreen(x + 1, y + 1, wz + h);
+    const p3 = worldToScreen(x, y + 1, wz + h);
 
-function draw() {
-    ctx.fillStyle = '#0a0a12';
-    ctx.fillRect(0, 0, W, H);
+    ctx.beginPath();
+    ctx.moveTo(p0.x, p0.y);
+    ctx.lineTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.lineTo(p3.x, p3.y);
+    ctx.closePath();
+    ctx.fillStyle = colorTop;
+    ctx.fill();
 
-    const hour = Math.floor(gameTime / 60);
-    const isNight = hour < 6 || hour >= 22;
-    const isSunset = hour >= 18 && hour < 22;
-    const isDawn = hour >= 5 && hour < 7;
-
-    rooms.forEach(room => {
-        ctx.fillStyle = room.color;
-        ctx.fillRect(room.x, room.y, room.w, room.h);
-
-        ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-        ctx.lineWidth = 1;
-        for (let i = 0; i < room.w; i += 20) {
-            ctx.beginPath(); ctx.moveTo(room.x + i, room.y); ctx.lineTo(room.x + i, room.y + room.h); ctx.stroke();
-        }
-        for (let i = 0; i < room.h; i += 20) {
-            ctx.beginPath(); ctx.moveTo(room.x, room.y + i); ctx.lineTo(room.x + room.w, room.y + i); ctx.stroke();
-        }
-
-        ctx.strokeStyle = room.accent;
-        ctx.lineWidth = 3;
-        ctx.strokeRect(room.x, room.y, room.w, room.h);
-
-        ctx.fillStyle = 'rgba(255,255,255,0.15)';
-        ctx.font = 'bold 12px Courier New';
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'alphabetic';
-        ctx.fillText(room.name.toUpperCase(), room.x + 10, room.y + 20);
-
-        if (room.isBalcony) {
-            const g = ctx.createLinearGradient(room.x, room.y, room.x, room.y + room.h);
-            g.addColorStop(0, 'rgba(255,150,80,0.3)');
-            g.addColorStop(1, 'rgba(100,50,100,0.2)');
-            ctx.fillStyle = g;
-            ctx.fillRect(room.x, room.y, room.w, room.h);
-        }
-    });
-
-    objects.forEach(obj => {
-        ctx.fillStyle = 'rgba(0,0,0,0.4)';
-        ctx.fillRect(obj.x + 3, obj.y + obj.h - 6, obj.w, 6);
-
-        ctx.fillStyle = '#3a3a4a';
-        ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
-        ctx.strokeStyle = '#5a5a6a';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(obj.x, obj.y, obj.w, obj.h);
-
-        ctx.font = '24px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(obj.icon, obj.x + obj.w / 2, obj.y + obj.h / 2);
-
-        if (nearestObject === obj && !player.action) {
-            ctx.strokeStyle = '#ffd966';
-            ctx.lineWidth = 3;
-            ctx.strokeRect(obj.x - 3, obj.y - 3, obj.w + 6, obj.h + 6);
-        }
-    });
-
-    particles.forEach(p => {
-        const alpha = p.life / p.maxLife;
-        ctx.fillStyle = p.color + alpha + ')';
+    // Боковая левая грань (если есть высота)
+    if (h > 0) {
+        const b0 = worldToScreen(x, y + 1, wz);
+        const b1 = worldToScreen(x + 1, y + 1, wz);
+        const b2 = worldToScreen(x + 1, y + 1, wz + h);
+        const b3 = worldToScreen(x, y + 1, wz + h);
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+        ctx.moveTo(b0.x, b0.y);
+        ctx.lineTo(b1.x, b1.y);
+        ctx.lineTo(b2.x, b2.y);
+        ctx.lineTo(b3.x, b3.y);
+        ctx.closePath();
+        ctx.fillStyle = colorSide;
         ctx.fill();
-    });
-
-    drawPlayer();
-
-    if (isNight) {
-        ctx.fillStyle = 'rgba(10,10,30,0.45)';
-        ctx.fillRect(0, 0, W, H);
-    } else if (isSunset) {
-        ctx.fillStyle = 'rgba(255,100,50,0.15)';
-        ctx.fillRect(0, 0, W, H);
-    } else if (isDawn) {
-        ctx.fillStyle = 'rgba(255,150,100,0.12)';
-        ctx.fillRect(0, 0, W, H);
     }
 
-    if (!player.action) drawThoughtBubble();
-    if (eventBanner) drawEventBanner();
-    if (nearestObject && !player.action) drawActionHint();
+    return { p0, p1, p2, p3 };
+}
+
+function drawFloor() {
+    floorTiles.forEach((tile, i) => {
+        const isCarpet = carpetTiles.some(c => c.wx === tile.wx && c.wy === tile.wy);
+        const color = isCarpet ? (i % 2 === 0 ? '#3a5a8a' : '#2a4a7a') : (i % 2 === 0 ? '#d8b878' : '#c8a868');
+        drawTile(tile.wx, tile.wy, 0, color, '#8a6a3a', 0);
+        // Обводка
+        const p = worldToScreen(tile.wx, tile.wy, 0);
+        const p1 = worldToScreen(tile.wx + 1, tile.wy, 0);
+        const p2 = worldToScreen(tile.wx + 1, tile.wy + 1, 0);
+        const p3 = worldToScreen(tile.wx, tile.wy + 1, 0);
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.lineTo(p3.x, p3.y);
+        ctx.closePath();
+        ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    });
+}
+
+function drawWalls() {
+    // Задняя стена
+    for (let x = 2; x < 18; x++) {
+        drawTile(x, 2, 0, '#d8c8a0', '#a89870', 160);
+    }
+    // Левая стена
+    for (let y = 3; y < 18; y++) {
+        drawTile(2, y, 0, '#c8b890', '#988860', 160);
+    }
+}
+
+function drawObject(obj) {
+    // Рисуем 3D бокс: сначала дальние тайлы, потом ближние
+    for (let dy = 0; dy < obj.h; dy++) {
+        for (let dx = 0; dx < obj.w; dx++) {
+            const isTop = true;
+            const color = obj.topColor || obj.baseColor;
+            const side = obj.sideColor || obj.baseColor;
+            drawTile(obj.wx + dx, obj.wy + dy, 0, color, side, obj.h3d || 20);
+        }
+    }
+
+    // Иконка поверх
+    if (obj.icon) {
+        const cx = worldToScreen(obj.wx + obj.w / 2, obj.wy + obj.h / 2, (obj.h3d || 20) + 10);
+        ctx.font = `${Math.max(20, 28 - (obj.w + obj.h))}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(obj.icon, cx.x, cx.y);
+    }
 }
 
 function drawPlayer() {
-    const x = player.x;
-    const y = player.y;
-
-    // Имя над головой
-    ctx.font = 'bold 11px Courier New';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillStyle = 'rgba(0,0,0,0.7)';
-    const nameWidth = ctx.measureText(player.name).width + 12;
-    ctx.fillRect(x - nameWidth / 2, y - 48, nameWidth, 16);
-    ctx.fillStyle = '#ffd966';
-    ctx.fillText(player.name, x, y - 36);
+    const p = worldToScreen(player.wx, player.wy, 0);
 
     // Тень
-    ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.beginPath();
-    ctx.ellipse(x, y + 16, 14, 5, 0, 0, Math.PI * 2);
+    ctx.ellipse(p.x, p.y, 14, 6, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
     ctx.fill();
 
     const bob = player.isMoving ? Math.sin(player.animFrame * Math.PI / 2) * 2 : 0;
+    const py = p.y - 30 + bob;
 
-    // Штаны
+    // Имя
+    ctx.font = 'bold 12px Segoe UI';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    const nameW = ctx.measureText('Ибрагим').width + 14;
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.beginPath();
+    ctx.roundRect(p.x - nameW / 2, py - 54, nameW, 18, 6);
+    ctx.fill();
+    ctx.fillStyle = '#ffd966';
+    ctx.fillText('Ибрагим', p.x, py - 40);
+
+    // Ноги (серые штаны)
     ctx.fillStyle = '#6a6a78';
-    ctx.fillRect(x - 7, y + 2 + bob, 14, 12);
+    ctx.fillRect(p.x - 8, py + 4, 16, 12);
     ctx.strokeStyle = '#4a4a58';
     ctx.lineWidth = 1;
-    ctx.strokeRect(x - 7, y + 2 + bob, 14, 12);
+    ctx.strokeRect(p.x - 8, py + 4, 16, 12);
 
-    // Футболка
+    // Кроксы (белые)
+    ctx.fillStyle = '#f0f0f0';
+    ctx.fillRect(p.x - 10, py + 14, 8, 5);
+    ctx.fillRect(p.x + 2, py + 14, 8, 5);
+    ctx.strokeStyle = '#b0b0b0';
+    ctx.strokeRect(p.x - 10, py + 14, 8, 5);
+    ctx.strokeRect(p.x + 2, py + 14, 8, 5);
+
+    // Тело (чёрная футболка)
     ctx.fillStyle = '#1a1a1a';
-    ctx.fillRect(x - 8, y - 8 + bob, 16, 12);
+    ctx.fillRect(p.x - 10, py - 6, 20, 14);
     ctx.strokeStyle = '#333';
-    ctx.strokeRect(x - 8, y - 8 + bob, 16, 12);
+    ctx.strokeRect(p.x - 10, py - 6, 20, 14);
 
     // Принт
     ctx.fillStyle = '#ff4a4a';
-    ctx.fillRect(x - 4, y - 5 + bob, 8, 3);
+    ctx.fillRect(p.x - 5, py - 2, 10, 4);
+
+    // Руки
+    ctx.fillStyle = '#e8c8a8';
+    ctx.fillRect(p.x - 13, py - 4, 3, 10);
+    ctx.fillRect(p.x + 10, py - 4, 3, 10);
 
     // Голова
     ctx.fillStyle = '#e8c8a8';
-    ctx.fillRect(x - 7, y - 22 + bob, 14, 14);
+    ctx.fillRect(p.x - 9, py - 24, 18, 18);
     ctx.strokeStyle = '#a08060';
-    ctx.strokeRect(x - 7, y - 22 + bob, 14, 14);
+    ctx.strokeRect(p.x - 9, py - 24, 18, 18);
 
     // Волосы
     ctx.fillStyle = '#2a1a10';
-    ctx.fillRect(x - 7, y - 24 + bob, 14, 5);
+    ctx.fillRect(p.x - 9, py - 26, 18, 7);
 
     // Очки
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(x - 3, y - 15 + bob, 2.5, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.arc(x + 3, y - 15 + bob, 2.5, 0, Math.PI * 2); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x - 0.5, y - 15 + bob); ctx.lineTo(x + 0.5, y - 15 + bob); ctx.stroke();
+    ctx.beginPath(); ctx.arc(p.x - 4, py - 15, 3, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(p.x + 4, py - 15, 3, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(p.x - 1, py - 15); ctx.lineTo(p.x + 1, py - 15); ctx.stroke();
 
-    // Кроксы
-    ctx.fillStyle = '#f0f0f0';
-    ctx.fillRect(x - 8, y + 13, 7, 5);
-    ctx.fillRect(x + 1, y + 13, 7, 5);
-    ctx.strokeStyle = '#b0b0b0';
-    ctx.strokeRect(x - 8, y + 13, 7, 5);
-    ctx.strokeRect(x + 1, y + 13, 7, 5);
+    // Облачко мысли
+    if (!state.action) {
+        const text = state.thought;
+        ctx.font = '13px Segoe UI';
+        const tw = ctx.measureText(text).width + 20;
+        const th = 26;
+        const bx = p.x - tw / 2;
+        const by = py - 90;
+
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.beginPath();
+        ctx.roundRect(bx, by, tw, th, 12);
+        ctx.fill();
+        ctx.strokeStyle = '#888';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Хвостик
+        ctx.beginPath();
+        ctx.moveTo(p.x - 5, by + th);
+        ctx.lineTo(p.x, by + th + 8);
+        ctx.lineTo(p.x + 5, by + th);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.fill();
+        ctx.strokeStyle = '#888';
+        ctx.stroke();
+
+        ctx.fillStyle = '#333';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, p.x, by + th / 2 + 1);
+    }
 }
 
-function drawThoughtBubble() {
-    const text = player.thought;
-    ctx.font = '13px Courier New';
-    const metrics = ctx.measureText(text);
-    const padding = 12;
-    const bw = metrics.width + padding * 2;
-    const bh = 28;
-    const bx = player.x - bw / 2;
-    const by = player.y - 80;
+function draw() {
+    // Фон
+    ctx.fillStyle = '#1a1410';
+    ctx.fillRect(0, 0, W, H);
 
-    ctx.fillStyle = 'rgba(255,255,255,0.95)';
-    ctx.beginPath();
-    ctx.roundRect(bx, by, bw, bh, 8);
-    ctx.fill();
-    ctx.strokeStyle = '#888';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+    // Пол
+    drawFloor();
 
-    ctx.beginPath();
-    ctx.moveTo(player.x - 5, by + bh);
-    ctx.lineTo(player.x, by + bh + 8);
-    ctx.lineTo(player.x + 5, by + bh);
-    ctx.closePath();
-    ctx.fillStyle = 'rgba(255,255,255,0.95)';
-    ctx.fill();
-    ctx.strokeStyle = '#888';
-    ctx.stroke();
+    // Ковёр (уже в floor, но добавим границу)
+    carpetTiles.forEach(t => {
+        const p = worldToScreen(t.wx + 0.5, t.wy + 0.5);
+        // ничего, просто подсветка
+    });
 
-    ctx.fillStyle = '#333';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, player.x, by + bh / 2 + 1);
+    // Объекты сортируем по глубине (y + x)
+    const sortedObjects = [...objects].sort((a, b) => (a.wx + a.wy) - (b.wx + b.wy));
+
+    // Стены
+    drawWalls();
+
+    // Объекты
+    sortedObjects.forEach(drawObject);
+
+    // Игрок
+    drawPlayer();
+
+    // Освещение — вечернее
+    const hour = state.gameTime;
+    let tint = null;
+    if (hour >= 18 || hour < 6) tint = 'rgba(20,20,60,0.25)';
+    else if (hour >= 16 && hour < 18) tint = 'rgba(255,140,80,0.10)';
+    if (tint) {
+        ctx.fillStyle = tint;
+        ctx.fillRect(0, 0, W, H);
+    }
 }
 
-function drawEventBanner() {
-    ctx.font = 'bold 18px Courier New';
-    const metrics = ctx.measureText(eventBanner);
-    const padding = 20;
-    const bw = metrics.width + padding * 2;
-    const bh = 44;
-    const bx = (W - bw) / 2;
-    const by = 80;
+// ============================================================
+// HUD
+// ============================================================
+function updateHUD() {
+    document.getElementById('n-food').style.width = state.needs.food + '%';
+    document.getElementById('n-sleep').style.width = state.needs.sleep + '%';
+    document.getElementById('n-hygiene').style.width = state.needs.hygiene + '%';
+    document.getElementById('n-nicotine').style.width = state.needs.nicotine + '%';
+    document.getElementById('n-cider').style.width = state.needs.cider + '%';
+    document.getElementById('n-faith').style.width = state.needs.faith + '%';
+    document.getElementById('n-mood').style.width = state.needs.mood + '%';
 
-    ctx.fillStyle = 'rgba(0,0,0,0.85)';
-    ctx.beginPath();
-    ctx.roundRect(bx, by, bw, bh, 10);
-    ctx.fill();
-    ctx.strokeStyle = '#ffd966';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    document.getElementById('stat-money').textContent = '₽ ' + state.money.toLocaleString('ru-RU');
+    document.getElementById('stat-online').textContent = state.online.toLocaleString('ru-RU');
+    document.getElementById('stat-followers').textContent = state.followers.toLocaleString('ru-RU');
+    document.getElementById('stat-subs').textContent = state.subs;
 
-    ctx.fillStyle = '#ffd966';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(eventBanner, W / 2, by + bh / 2);
+    const months = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+    const days = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+    const dow = days[(state.day + 6) % 7];
+    document.getElementById('date-text').textContent = `${state.day} ${months[state.month - 1]}, ${dow}`;
 }
 
-function drawActionHint() {
-    const obj = nearestObject;
-    ctx.font = 'bold 13px Courier New';
-    const text = 'E — ' + obj.label;
-    const metrics = ctx.measureText(text);
-    const padding = 12;
-    const bw = metrics.width + padding * 2;
-    const bh = 26;
-    const bx = obj.x + obj.w / 2 - bw / 2;
-    const by = obj.y - 35;
-
-    ctx.fillStyle = 'rgba(255,217,102,0.95)';
-    ctx.beginPath();
-    ctx.roundRect(bx, by, bw, bh, 6);
-    ctx.fill();
-
-    ctx.fillStyle = '#1a1a1a';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(text, obj.x + obj.w / 2, by + bh / 2);
+function setSpeed(s) {
+    state.speed = s;
+    document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+    const map = { 0: null, 1: 'sp1', 2: 'sp2', 4: 'sp4' };
+    if (map[s]) document.getElementById(map[s]).classList.add('active');
 }
 
+// roundRect polyfill
 if (!CanvasRenderingContext2D.prototype.roundRect) {
     CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
-        if (w < 2 * r) r = w / 2;
-        if (h < 2 * r) r = h / 2;
         this.beginPath();
         this.moveTo(x + r, y);
         this.arcTo(x + w, y, x + w, y + h, r);
@@ -639,67 +883,20 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
 }
 
 // ============================================================
-// HUD
-// ============================================================
-
-function updateHUD() {
-    const map = {
-        'need-food':    { val: player.needs.food,    color: '#ff6b6b' },
-        'need-sleep':   { val: player.needs.sleep,   color: '#4dabf7' },
-        'need-hygiene': { val: player.needs.hygiene, color: '#63e6be' },
-        'need-nicotine':{ val: player.needs.nicotine,color: '#adb5bd' },
-        'need-cider':   { val: player.needs.cider,   color: '#ffa94d' },
-        'need-faith':   { val: player.needs.faith,   color: '#b197fc' },
-        'need-mood':    { val: player.needs.mood,    color: '#ffd43b' }
-    };
-    for (const id in map) {
-        const el = document.getElementById(id);
-        if (el) {
-            el.style.width = map[id].val + '%';
-            el.style.background = map[id].color;
-        }
-    }
-    const hh = String(Math.floor(gameTime / 60)).padStart(2, '0');
-    const mm = String(Math.floor(gameTime % 60)).padStart(2, '0');
-    document.getElementById('clock').textContent = `Ибрагим · День ${dayCount} · ${hh}:${mm}`;
-}
-
-// ============================================================
 // ЦИКЛ
 // ============================================================
-
 function loop(now) {
-    const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
-    lastFrameTime = now;
+    const dt = Math.min((now - lastTime) / 1000, 0.1);
+    lastTime = now;
     update(dt);
     draw();
     updateHUD();
     requestAnimationFrame(loop);
 }
 
-// ============================================================
-// УПРАВЛЕНИЕ
-// ============================================================
-
-window.addEventListener('keydown', e => {
-    keys[e.key.toLowerCase()] = true;
-    if (e.key.toLowerCase() === 'e') tryInteract();
-    if (e.key === 'Escape') location.reload();
-    if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(e.key.toLowerCase())) {
-        e.preventDefault();
-    }
-});
-
-window.addEventListener('keyup', e => {
-    keys[e.key.toLowerCase()] = false;
-});
-
-// ============================================================
-// СТАРТ
-// ============================================================
-
-showEvent('🌅 Доброе утро, Ибрагим! День ' + dayCount, 3);
+updateHUD();
 requestAnimationFrame(loop);
+
 </script>
 
 </body>
