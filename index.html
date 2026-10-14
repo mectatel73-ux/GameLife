@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>День из жизни Ибрагима</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        font-family: 'Courier New', monospace;
+        background: #0f0f14;
+        color: #e0e0e0;
+        overflow: hidden;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    #game-wrap {
+        position: relative;
+        background: #1a1a24;
+        border: 3px solid #2a2a3a;
+        border-radius: 8px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 100px rgba(100,80,200,0.1);
+    }
+    canvas {
+        display: block;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        border-radius: 5px;
+    }
+    #hud {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        right: 8px;
+        display: flex;
+        justify-content: space-between;
+        pointer-events: none;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .hud-block {
+        background: rgba(0,0,0,0.75);
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+    }
+    .name-tag {
+        color: #ffd966;
+        font-size: 13px;
+    }
+    .needs {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .need {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .need-bar {
+        width: 44px;
+        height: 8px;
+        background: rgba(255,255,255,0.15);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    .need-bar-fill {
+        height: 100%;
+        transition: width 0.3s;
+    }
+    .time-block {
+        font-size: 13px;
+    }
+    #hint {
+        margin-top: 12px;
+        font-size: 12px;
+        color: #6a6a7a;
+        text-align: center;
+        letter-spacing: 1px;
+    }
+    #hint kbd {
+        background: #2a2a3a;
+        color: #b0b0c0;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: inherit;
+    }
+</style>
+</head>
+<body>
+
+<div id="game-wrap">
+    <canvas id="game" width="960" height="640"></canvas>
+    <div id="hud">
+        <div class="needs">
+            <div class="need hud-block">🍔 <div class="need-bar"><div class="need-bar-fill" id="need-food"></div></div></div>
+            <div class="need hud-block">😴 <div class="need-bar"><div class="need-bar-fill" id="need-sleep"></div></div></div>
+            <div class="need hud-block">🚿 <div class="need-bar"><div class="need-bar-fill" id="need-hygiene"></div></div></div>
+            <div class="need hud-block">🚬 <div class="need-bar"><div class="need-bar-fill" id="need-nicotine"></div></div></div>
+            <div class="need hud-block">🍺 <div class="need-bar"><div class="need-bar-fill" id="need-cider"></div></div></div>
+            <div class="need hud-block">🕌 <div class="need-bar"><div class="need-bar-fill" id="need-faith"></div></div></div>
+            <div class="need hud-block">✨ <div class="need-bar"><div class="need-bar-fill" id="need-mood"></div></div></div>
+        </div>
+        <div class="hud-block time-block" id="clock">07:00</div>
+    </div>
+</div>
+
+<div id="hint">
+    <kbd>W A S D</kbd> или <kbd>← ↑ → ↓</kbd> — ходить &nbsp;·&nbsp; <kbd>E</kbd> — взаимодействовать &nbsp;·&nbsp; <kbd>ESC</kbd> — сброс
+</div>
+
+<script>
+// ============================================================
+// ИГРА: ДЕНЬ ИЗ ЖИЗНИ ИБРАГИМА
+// ============================================================
+
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+const W = canvas.width;
+const H = canvas.height;
+
+// === Игровое время ===
+let gameTime = 7 * 60;
+const MINUTES_PER_REAL_SEC = 20;
+
+let lastFrameTime = performance.now();
+let dayCount = 1;
+
+// === Персонаж — Ибрагим ===
+const player = {
+    name: 'Ибрагим',
+    x: 480, y: 320,
+    w: 24, h: 32,
+    speed: 140,
+    dir: 'down',
+    animFrame: 0,
+    animTime: 0,
+    isMoving: false,
+    needs: {
+        food: 70,
+        sleep: 80,
+        hygiene: 75,
+        nicotine: 60,
+        cider: 50,
+        faith: 80,
+        mood: 70
+    },
+    action: null,
+    actionTime: 0,
+    thought: 'Ибрагим, пора вставать...',
+    thoughtTime: 0
+};
+
+// === Карта квартиры ===
+const rooms = [
+    { x: 40,  y: 40,  w: 280, h: 220, name: 'Спальня',   color: '#2d2438', accent: '#4a3a5c' },
+    { x: 340, y: 40,  w: 280, h: 220, name: 'Кухня',     color: '#2d3838', accent: '#4a5c5c' },
+    { x: 640, y: 40,  w: 280, h: 220, name: 'Гостиная',  color: '#38302d', accent: '#5c4a3a' },
+    { x: 40,  y: 280, w: 280, h: 220, name: 'Ванная',    color: '#243038', accent: '#3a4c5c' },
+    { x: 340, y: 280, w: 280, h: 220, name: 'Прихожая',  color: '#302d38', accent: '#4c3a5c' },
+    { x: 640, y: 280, w: 280, h: 220, name: 'Балкон',    color: '#1a1a2a', accent: '#3a3a5c', isBalcony: true }
+];
+
+// === Объекты ===
+const objects = [
+    // Спальня
+    { x: 100, y: 100, w: 50, h: 70, id: 'bed',    room: 0, icon: '🛏️', label: 'Спать',         action: 'sleep' },
+    { x: 220, y: 90,  w: 40, h: 50, id: 'wardrobe',room: 0, icon: '🚪', label: 'Одеваться',    action: 'dress' },
+    { x: 260, y: 200, w: 40, h: 40, id: 'quran',  room: 0, icon: '📖', label: 'Читать намаз', action: 'pray' },
+
+    // Кухня
+    { x: 400, y: 90,  w: 50, h: 50, id: 'stove',  room: 1, icon: '🍳', label: 'Готовить',      action: 'cook' },
+    { x: 480, y: 90,  w: 50, h: 60, id: 'fridge', room: 1, icon: '🧊', label: 'Поесть',        action: 'eat' },
+    { x: 560, y: 200, w: 40, h: 40, id: 'cider',  room: 1, icon: '🍺', label: 'Выпить сидр',   action: 'cider' },
+
+    // Гостиная
+    { x: 700, y: 90,  w: 60, h: 50, id: 'sofa',   room: 2, icon: '🛋️', label: 'Отдохнуть',    action: 'rest' },
+    { x: 800, y: 90,  w: 50, h: 50, id: 'tv',     room: 2, icon: '📺', label: 'Смотреть ТВ',  action: 'tv' },
+    { x: 700, y: 200, w: 50, h: 40, id: 'pc',     room: 2, icon: '💻', label: 'Работать',      action: 'work' },
+
+    // Ванная
+    { x: 100, y: 340, w: 60, h: 60, id: 'shower', room: 3, icon: '🚿', label: 'Душ',           action: 'shower' },
+    { x: 220, y: 340, w: 40, h: 50, id: 'sink',   room: 3, icon: '🪞', label: 'Умыться',       action: 'wash' },
+
+    // Прихожая
+    { x: 420, y: 400, w: 60, h: 60, id: 'exit',   room: 4, icon: '🚪', label: 'На склад',      action: 'work_out' },
+
+    // Балкон
+    { x: 700, y: 340, w: 40, h: 40, id: 'smoke',  room: 5, icon: '🚬', label: 'Покурить',      action: 'smoke' },
+    { x: 820, y: 340, w: 60, h: 50, id: 'sunset', room: 5, icon: '🌅', label: 'Полюбоваться',  action: 'look' }
+];
+
+let keys = {};
+let particles = [];
+let nearestObject = null;
+
+let eventBanner = null;
+let eventBannerTime = 0;
+
+// ============================================================
+// ЛОГИКА
+// ============================================================
+
+function update(dt) {
+    gameTime += MINUTES_PER_REAL_SEC * dt;
+    if (gameTime >= 24 * 60) {
+        gameTime -= 24 * 60;
+        dayCount++;
+        showEvent('🌅 Новый день #' + dayCount + ' у Ибрагима', 4);
+    }
+
+    const timeFactor = dt * 0.5;
+    player.needs.food = Math.max(0, player.needs.food - timeFactor * 0.4);
+    player.needs.hygiene = Math.max(0, player.needs.hygiene - timeFactor * 0.2);
+    player.needs.nicotine = Math.max(0, player.needs.nicotine - timeFactor * 0.5);
+    player.needs.cider = Math.max(0, player.needs.cider - timeFactor * 0.3);
+    player.needs.sleep = Math.max(0, player.needs.sleep - timeFactor * 0.3);
+
+    const avgNeeds = (player.needs.food + player.needs.sleep + player.needs.hygiene + player.needs.nicotine + player.needs.cider + player.needs.faith) / 6;
+    player.needs.mood = player.needs.mood * 0.98 + avgNeeds * 0.02;
+    player.needs.mood = Math.max(0, Math.min(100, player.needs.mood));
+
+    player.thoughtTime -= dt;
+    if (player.thoughtTime <= 0) {
+        player.thoughtTime = 5 + Math.random() * 4;
+        player.thought = generateThought();
+    }
+
+    if (!player.action) {
+        let dx = 0, dy = 0;
+        if (keys['w'] || keys['arrowup']) dy -= 1;
+        if (keys['s'] || keys['arrowdown']) dy += 1;
+        if (keys['a'] || keys['arrowleft']) dx -= 1;
+        if (keys['d'] || keys['arrowright']) dx += 1;
+
+        if (dx || dy) {
+            const len = Math.hypot(dx, dy);
+            dx /= len; dy /= len;
+            player.x += dx * player.speed * dt;
+            player.y += dy * player.speed * dt;
+            player.isMoving = true;
+            player.animTime += dt;
+            if (player.animTime > 0.15) { player.animFrame = (player.animFrame + 1) % 4; player.animTime = 0; }
+            if (Math.abs(dx) > Math.abs(dy)) player.dir = dx > 0 ? 'right' : 'left';
+            else player.dir = dy > 0 ? 'down' : 'up';
+        } else {
+            player.isMoving = false;
+            player.animFrame = 0;
+        }
+        player.x = Math.max(20, Math.min(W - 20, player.x));
+        player.y = Math.max(20, Math.min(H - 20, player.y));
+    } else {
+        player.actionTime -= dt;
+        if (player.actionTime <= 0) finishAction();
+    }
+
+    nearestObject = null;
+    let minDist = 60;
+    objects.forEach(obj => {
+        const objCx = obj.x + obj.w / 2;
+        const objCy = obj.y + obj.h / 2;
+        const dist = Math.hypot(player.x - objCx, player.y - objCy);
+        if (dist < minDist) { minDist = dist; nearestObject = obj; }
+    });
+
+    particles = particles.filter(p => {
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.life -= dt;
+        p.vy += p.gravity * dt;
+        return p.life > 0;
+    });
+
+    if (player.action && (player.action === 'smoke' || player.action === 'shower')) {
+        if (Math.random() < 0.3) {
+            particles.push({
+                x: player.x + (Math.random() - 0.5) * 20,
+                y: player.y - 20,
+                vx: (Math.random() - 0.5) * 20,
+                vy: -30 - Math.random() * 20,
+                gravity: -10,
+                life: 1.5,
+                maxLife: 1.5,
+                color: player.action === 'smoke' ? 'rgba(180,180,200,' : 'rgba(150,200,255,',
+                size: 4 + Math.random() * 4
+            });
+        }
+    }
+
+    if (eventBannerTime > 0) {
+        eventBannerTime -= dt;
+        if (eventBannerTime <= 0) eventBanner = null;
+    }
+}
+
+function generateThought() {
+    const n = player.needs;
+    const thoughts = [];
+    if (n.food < 30) thoughts.push('Ибрагим, есть хочу...');
+    if (n.sleep < 30) thoughts.push('Спать бы...');
+    if (n.hygiene < 30) thoughts.push('В душ бы...');
+    if (n.nicotine < 30) thoughts.push('Покурить хочется...');
+    if (n.cider < 30) thoughts.push('Сидр бы сейчас...');
+    if (n.faith < 40) thoughts.push('Надо бы намаз прочитать...');
+    if (n.mood < 30) thoughts.push('Что-то грустно...');
+
+    if (thoughts.length === 0) {
+        const idle = [
+            'Хорошо...',
+            'Спокойно.',
+            'Закат красивый.',
+            'Завтра на склад...',
+            'Стараюсь быть лучше.',
+            'Ибрагим, ты справишься.',
+            'Жизнь — сложная штука.',
+            'Может, сидр?',
+            'Пора намаз читать...',
+            'Главное — не сдаваться.'
+        ];
+        return idle[Math.floor(Math.random() * idle.length)];
+    }
+    return thoughts[Math.floor(Math.random() * thoughts.length)];
+}
+
+function showEvent(text, duration = 3) {
+    eventBanner = text;
+    eventBannerTime = duration;
+}
+
+function tryInteract() {
+    if (!nearestObject || player.action) return;
+    const action = nearestObject.action;
+    player.action = action;
+    player.actionTime = getActionDuration(action);
+    player.x = nearestObject.x + nearestObject.w / 2;
+    player.y = nearestObject.y + nearestObject.h + 20;
+    player.dir = 'up';
+    showEvent(nearestObject.icon + ' ' + nearestObject.label + '...', player.actionTime);
+}
+
+function getActionDuration(action) {
+    const map = {
+        sleep: 8, eat: 3, cook: 4, shower: 3, wash: 2,
+        smoke: 4, cider: 3, pray: 3, tv: 5, work: 6,
+        work_out: 8, rest: 4, dress: 2, look: 4
+    };
+    return map[action] || 3;
+}
+
+function finishAction() {
+    const n = player.needs;
+    const a = player.action;
+
+    if (a === 'sleep') { n.sleep = Math.min(100, n.sleep + 50); n.mood = Math.min(100, n.mood + 5); }
+    if (a === 'eat') { n.food = Math.min(100, n.food + 45); }
+    if (a === 'cook') { n.food = Math.min(100, n.food + 30); n.mood = Math.min(100, n.mood + 3); }
+    if (a === 'shower') { n.hygiene = Math.min(100, n.hygiene + 60); n.mood = Math.min(100, n.mood + 5); }
+    if (a === 'wash') { n.hygiene = Math.min(100, n.hygiene + 25); }
+    if (a === 'smoke') { n.nicotine = Math.min(100, n.nicotine + 50); n.mood = Math.min(100, n.mood + 5); n.hygiene = Math.max(0, n.hygiene - 5); }
+    if (a === 'cider') { n.cider = Math.min(100, n.cider + 60); n.mood = Math.min(100, n.mood + 10); }
+    if (a === 'pray') {
+        n.faith = Math.min(100, n.faith + 50);
+        n.mood = Math.min(100, n.mood + 15);
+        showEvent('🕌 Ибрагим прочитал намаз', 3);
+    }
+    if (a === 'tv') { n.mood = Math.min(100, n.mood + 8); n.sleep = Math.max(0, n.sleep - 5); }
+    if (a === 'work') { n.mood = Math.max(0, n.mood - 5); n.sleep = Math.max(0, n.sleep - 15); n.food = Math.max(0, n.food - 10); }
+    if (a === 'work_out') {
+        n.mood = Math.max(0, n.mood - 15);
+        n.food = Math.max(0, n.food - 30);
+        n.sleep = Math.max(0, n.sleep - 25);
+        n.hygiene = Math.max(0, n.hygiene - 20);
+        gameTime += 8 * 60;
+        showEvent('🚚 Ибрагим вернулся со склада. Устал...', 4);
+    }
+    if (a === 'rest') { n.mood = Math.min(100, n.mood + 10); n.sleep = Math.min(100, n.sleep + 10); }
+    if (a === 'look') { n.mood = Math.min(100, n.mood + 20); }
+
+    player.action = null;
+}
+
+// ============================================================
+// РЕНДЕР
+// ============================================================
+
+function draw() {
+    ctx.fillStyle = '#0a0a12';
+    ctx.fillRect(0, 0, W, H);
+
+    const hour = Math.floor(gameTime / 60);
+    const isNight = hour < 6 || hour >= 22;
+    const isSunset = hour >= 18 && hour < 22;
+    const isDawn = hour >= 5 && hour < 7;
+
+    rooms.forEach(room => {
+        ctx.fillStyle = room.color;
+        ctx.fillRect(room.x, room.y, room.w, room.h);
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < room.w; i += 20) {
+            ctx.beginPath(); ctx.moveTo(room.x + i, room.y); ctx.lineTo(room.x + i, room.y + room.h); ctx.stroke();
+        }
+        for (let i = 0; i < room.h; i += 20) {
+            ctx.beginPath(); ctx.moveTo(room.x, room.y + i); ctx.lineTo(room.x + room.w, room.y + i); ctx.stroke();
+        }
+
+        ctx.strokeStyle = room.accent;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(room.x, room.y, room.w, room.h);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.font = 'bold 12px Courier New';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText(room.name.toUpperCase(), room.x + 10, room.y + 20);
+
+        if (room.isBalcony) {
+            const g = ctx.createLinearGradient(room.x, room.y, room.x, room.y + room.h);
+            g.addColorStop(0, 'rgba(255,150,80,0.3)');
+            g.addColorStop(1, 'rgba(100,50,100,0.2)');
+            ctx.fillStyle = g;
+            ctx.fillRect(room.x, room.y, room.w, room.h);
+        }
+    });
+
+    objects.forEach(obj => {
+        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+        ctx.fillRect(obj.x + 3, obj.y + obj.h - 6, obj.w, 6);
+
+        ctx.fillStyle = '#3a3a4a';
+        ctx.fillRect(obj.x, obj.y, obj.w, obj.h);
+        ctx.strokeStyle = '#5a5a6a';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(obj.x, obj.y, obj.w, obj.h);
+
+        ctx.font = '24px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(obj.icon, obj.x + obj.w / 2, obj.y + obj.h / 2);
+
+        if (nearestObject === obj && !player.action) {
+            ctx.strokeStyle = '#ffd966';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(obj.x - 3, obj.y - 3, obj.w + 6, obj.h + 6);
+        }
+    });
+
+    particles.forEach(p => {
+        const alpha = p.life / p.maxLife;
+        ctx.fillStyle = p.color + alpha + ')';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * alpha, 0, Math.PI * 2);
+        ctx.fill();
+    });
+
+    drawPlayer();
+
+    if (isNight) {
+        ctx.fillStyle = 'rgba(10,10,30,0.45)';
+        ctx.fillRect(0, 0, W, H);
+    } else if (isSunset) {
+        ctx.fillStyle = 'rgba(255,100,50,0.15)';
+        ctx.fillRect(0, 0, W, H);
+    } else if (isDawn) {
+        ctx.fillStyle = 'rgba(255,150,100,0.12)';
+        ctx.fillRect(0, 0, W, H);
+    }
+
+    if (!player.action) drawThoughtBubble();
+    if (eventBanner) drawEventBanner();
+    if (nearestObject && !player.action) drawActionHint();
+}
+
+function drawPlayer() {
+    const x = player.x;
+    const y = player.y;
+
+    // Имя над головой
+    ctx.font = 'bold 11px Courier New';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    const nameWidth = ctx.measureText(player.name).width + 12;
+    ctx.fillRect(x - nameWidth / 2, y - 48, nameWidth, 16);
+    ctx.fillStyle = '#ffd966';
+    ctx.fillText(player.name, x, y - 36);
+
+    // Тень
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.beginPath();
+    ctx.ellipse(x, y + 16, 14, 5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    const bob = player.isMoving ? Math.sin(player.animFrame * Math.PI / 2) * 2 : 0;
+
+    // Штаны
+    ctx.fillStyle = '#6a6a78';
+    ctx.fillRect(x - 7, y + 2 + bob, 14, 12);
+    ctx.strokeStyle = '#4a4a58';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x - 7, y + 2 + bob, 14, 12);
+
+    // Футболка
+    ctx.fillStyle = '#1a1a1a';
+    ctx.fillRect(x - 8, y - 8 + bob, 16, 12);
+    ctx.strokeStyle = '#333';
+    ctx.strokeRect(x - 8, y - 8 + bob, 16, 12);
+
+    // Принт
+    ctx.fillStyle = '#ff4a4a';
+    ctx.fillRect(x - 4, y - 5 + bob, 8, 3);
+
+    // Голова
+    ctx.fillStyle = '#e8c8a8';
+    ctx.fillRect(x - 7, y - 22 + bob, 14, 14);
+    ctx.strokeStyle = '#a08060';
+    ctx.strokeRect(x - 7, y - 22 + bob, 14, 14);
+
+    // Волосы
+    ctx.fillStyle = '#2a1a10';
+    ctx.fillRect(x - 7, y - 24 + bob, 14, 5);
+
+    // Очки
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(x - 3, y - 15 + bob, 2.5, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(x + 3, y - 15 + bob, 2.5, 0, Math.PI * 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x - 0.5, y - 15 + bob); ctx.lineTo(x + 0.5, y - 15 + bob); ctx.stroke();
+
+    // Кроксы
+    ctx.fillStyle = '#f0f0f0';
+    ctx.fillRect(x - 8, y + 13, 7, 5);
+    ctx.fillRect(x + 1, y + 13, 7, 5);
+    ctx.strokeStyle = '#b0b0b0';
+    ctx.strokeRect(x - 8, y + 13, 7, 5);
+    ctx.strokeRect(x + 1, y + 13, 7, 5);
+}
+
+function drawThoughtBubble() {
+    const text = player.thought;
+    ctx.font = '13px Courier New';
+    const metrics = ctx.measureText(text);
+    const padding = 12;
+    const bw = metrics.width + padding * 2;
+    const bh = 28;
+    const bx = player.x - bw / 2;
+    const by = player.y - 80;
+
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, bh, 8);
+    ctx.fill();
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(player.x - 5, by + bh);
+    ctx.lineTo(player.x, by + bh + 8);
+    ctx.lineTo(player.x + 5, by + bh);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.fill();
+    ctx.strokeStyle = '#888';
+    ctx.stroke();
+
+    ctx.fillStyle = '#333';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, player.x, by + bh / 2 + 1);
+}
+
+function drawEventBanner() {
+    ctx.font = 'bold 18px Courier New';
+    const metrics = ctx.measureText(eventBanner);
+    const padding = 20;
+    const bw = metrics.width + padding * 2;
+    const bh = 44;
+    const bx = (W - bw) / 2;
+    const by = 80;
+
+    ctx.fillStyle = 'rgba(0,0,0,0.85)';
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, bh, 10);
+    ctx.fill();
+    ctx.strokeStyle = '#ffd966';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffd966';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(eventBanner, W / 2, by + bh / 2);
+}
+
+function drawActionHint() {
+    const obj = nearestObject;
+    ctx.font = 'bold 13px Courier New';
+    const text = 'E — ' + obj.label;
+    const metrics = ctx.measureText(text);
+    const padding = 12;
+    const bw = metrics.width + padding * 2;
+    const bh = 26;
+    const bx = obj.x + obj.w / 2 - bw / 2;
+    const by = obj.y - 35;
+
+    ctx.fillStyle = 'rgba(255,217,102,0.95)';
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, bh, 6);
+    ctx.fill();
+
+    ctx.fillStyle = '#1a1a1a';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, obj.x + obj.w / 2, by + bh / 2);
+}
+
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+        if (w < 2 * r) r = w / 2;
+        if (h < 2 * r) r = h / 2;
+        this.beginPath();
+        this.moveTo(x + r, y);
+        this.arcTo(x + w, y, x + w, y + h, r);
+        this.arcTo(x + w, y + h, x, y + h, r);
+        this.arcTo(x, y + h, x, y, r);
+        this.arcTo(x, y, x + w, y, r);
+        this.closePath();
+        return this;
+    };
+}
+
+// ============================================================
+// HUD
+// ============================================================
+
+function updateHUD() {
+    const map = {
+        'need-food':    { val: player.needs.food,    color: '#ff6b6b' },
+        'need-sleep':   { val: player.needs.sleep,   color: '#4dabf7' },
+        'need-hygiene': { val: player.needs.hygiene, color: '#63e6be' },
+        'need-nicotine':{ val: player.needs.nicotine,color: '#adb5bd' },
+        'need-cider':   { val: player.needs.cider,   color: '#ffa94d' },
+        'need-faith':   { val: player.needs.faith,   color: '#b197fc' },
+        'need-mood':    { val: player.needs.mood,    color: '#ffd43b' }
+    };
+    for (const id in map) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.width = map[id].val + '%';
+            el.style.background = map[id].color;
+        }
+    }
+    const hh = String(Math.floor(gameTime / 60)).padStart(2, '0');
+    const mm = String(Math.floor(gameTime % 60)).padStart(2, '0');
+    document.getElementById('clock').textContent = `Ибрагим · День ${dayCount} · ${hh}:${mm}`;
+}
+
+// ============================================================
+// ЦИКЛ
+// ============================================================
+
+function loop(now) {
+    const dt = Math.min((now - lastFrameTime) / 1000, 0.1);
+    lastFrameTime = now;
+    update(dt);
+    draw();
+    updateHUD();
+    requestAnimationFrame(loop);
+}
+
+// ============================================================
+// УПРАВЛЕНИЕ
+// ============================================================
+
+window.addEventListener('keydown', e => {
+    keys[e.key.toLowerCase()] = true;
+    if (e.key.toLowerCase() === 'e') tryInteract();
+    if (e.key === 'Escape') location.reload();
+    if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+    }
+});
+
+window.addEventListener('keyup', e => {
+    keys[e.key.toLowerCase()] = false;
+});
+
+// ============================================================
+// СТАРТ
+// ============================================================
+
+showEvent('🌅 Доброе утро, Ибрагим! День ' + dayCount, 3);
+requestAnimationFrame(loop);
+</script>
+
+</body>
+</html>
