@@ -12,7 +12,6 @@
     }
     #game { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
 
-    /* ПРЕДЗАГРУЗКА */
     #preloader {
         position: fixed; inset: 0;
         background: linear-gradient(180deg, #1a0a15 0%, #0a0510 100%);
@@ -61,7 +60,6 @@
         font-weight: bold; margin-bottom: 8px; color: #ff6b6b;
     }
 
-    /* ФОН */
     .bg-layer {
         position: absolute; inset: -3%;
         background-size: cover; background-position: center;
@@ -94,7 +92,6 @@
         pointer-events: none; z-index: 4;
     }
 
-    /* ДИАЛОГ */
     #dialogue-box {
         position: absolute; bottom: 0; left: 0; right: 0;
         min-height: 280px; z-index: 10;
@@ -126,7 +123,6 @@
     }
     @keyframes blink { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.9; } }
 
-    /* ВЫБОР */
     #choices {
         position: absolute; bottom: 300px; left: 50%;
         transform: translateX(-50%);
@@ -169,7 +165,6 @@
     }
     .choice-btn.pribit::before { background: #b197fc; }
 
-    /* ЗАГОЛОВОК */
     #chapter-title {
         position: absolute; top: 42%; left: 50%;
         transform: translate(-50%, -50%) scale(0.7);
@@ -192,7 +187,6 @@
         font-style: italic; font-weight: normal;
     }
 
-    /* HUD */
     #hud {
         position: absolute; top: 20px; left: 20px;
         display: flex; flex-direction: column; gap: 10px;
@@ -231,7 +225,6 @@
     .fill-lost { background: linear-gradient(90deg, #748ffc, #91a7ff); }
     .fill-hope { background: linear-gradient(90deg, #ffd43b, #ffec99); }
 
-    /* ПРОБИТЬ СУДЬБУ */
     #pribit-overlay {
         position: absolute; inset: 0;
         background: radial-gradient(ellipse at center, rgba(180,150,255,0.4) 0%, rgba(80,20,120,0.9) 100%);
@@ -240,7 +233,6 @@
     }
     #pribit-overlay.show { opacity: 1; }
 
-    /* ЧАСТИЦЫ */
     .dust {
         position: absolute; width: 3px; height: 3px;
         background: rgba(255,220,150,0.5); border-radius: 50%;
@@ -254,7 +246,6 @@
         100% { transform: translate(80px, -100vh) scale(0.5); opacity: 0; }
     }
 
-    /* СТАРТ */
     #start-screen {
         position: fixed; inset: 0;
         background: linear-gradient(180deg, #1a0a15 0%, #0a0510 100%);
@@ -293,7 +284,6 @@
         max-width: 600px; line-height: 1.9;
     }
 
-    /* ФИНАЛ */
     #end-screen {
         position: fixed; inset: 0;
         background: radial-gradient(ellipse at center, #2a1a2e 0%, #0a0510 100%);
@@ -410,9 +400,7 @@ const state = {
     flags: { pribit_count: 0 }
 };
 
-// ============================================================
-// ИМЕНА ФАЙЛОВ — ТОЧНО КАК В РЕПОЗИТОРИИ
-// ============================================================
+// Все фото, которые есть в репозитории
 const ALL_PHOTOS = [
     'childhood.jpg',
     'dasha-time.jpg',
@@ -425,7 +413,6 @@ const ALL_PHOTOS = [
     'julia-end.jpg',
     'julia-izhevsk.jpg',
     'julia-time.jpg',
-    'school.png',
     'school.webp',
     'shinka.jpg',
     'smoke.jpg',
@@ -472,7 +459,6 @@ function updatePreloader() {
     }
 }
 
-/* МУЗЫКА */
 let audioCtx = null;
 let musicTimers = [];
 let currentTheme = null;
@@ -527,7 +513,6 @@ function stopTheme() {
     currentTheme = null;
 }
 
-/* СЦЕНАРИЙ */
 const script = {
 
     prologue: {
@@ -758,7 +743,7 @@ const script = {
     },
 
     ch3_1: {
-        bg: 'school.png', theme: 'childhood',
+        bg: 'school.webp', theme: 'childhood',
         lines: [
             { speaker: '...', text: 'Они играли в Сталкера. Ночами. Обсуждали миры, зоны, артефакты. Это были самые спокойные ночи в жизни Ибрагима.' },
             { speaker: 'Ильназ', text: 'Ибрагим, ты кем хочешь стать?' },
@@ -771,7 +756,7 @@ const script = {
     },
 
     ch3_2: {
-        bg: 'school.png', theme: 'melancholy',
+        bg: 'school.webp', theme: 'melancholy',
         lines: [
             { speaker: 'Ибрагим', text: 'Дружба — это не про меня. Люди всё равно уходят.' },
             { speaker: '...', text: 'Но Ильназ всё равно был рядом. Всегда. Даже когда Ибрагим этого не заслуживал. Даже когда не замечал. Даже когда был невыносим.' },
@@ -823,12 +808,16 @@ const script = {
     },
 
     ch5: {
-        bg: 'stroyka.jpg', theme: 'melancholy',
-        title: 'ГЛАВА V', subtitle: '～ Работа ～',
+        bg: 'svetly.jpg', theme: 'melancholy',
+        title: 'ГЛАВА V', subtitle: '～ Светлый ～',
         lines: [
-            { speaker: '...', text: 'Мама уехала в Москву. Ипотека в Светлом. Ибрагим остался один — но не чувствовал одиночества. Работал. Много. Как будто работа могла заменить всё.' },
+            { speaker: '...', text: 'Мама взяла ипотеку. В Светлом — новом районе под Казанью. Многоэтажки, свежий асфальт, детские площадки. Квартира на пятом этаже. Большая. Светлая. И пустая.' },
+            { speaker: '...', text: 'А сама — уехала в Москву. На заработки. Чтобы платить за эту квартиру. Чтобы сын жил в нормальном месте. Ибрагим остался один.' },
+            { speaker: '...', text: 'Впервые в жизни — совсем один. Без бабушки. Без дедушки. Без мамы. Только кот. Только тишина. Только пустые комнаты.' },
+            { speaker: '...', text: 'Но он не чувствовал одиночества. Работал. Много. Как будто работа могла заменить всё. Как будто она могла заполнить пустоту.' },
             { speaker: '...', text: 'Курьерка. С Ильназом. Потом — с Искандером. Весёлые были времена. Дерзкие. Молодые. Они смеялись над всем. Над собой. Над миром. Над жизнью.' },
-            { speaker: '...', text: 'Потом шиномонтаж. Ильназ — убийца колёс. Ибрагим — вечно болел. Но зарабатывали хорошо. Впервые в жизни — хорошо.' },
+            { speaker: '...', text: 'Потом шиномонтаж. Гараж на окраине. Запах резины и масла. Ильназ — убийца колёс. Ибрагим — вечно болел. Но зарабатывали хорошо. Впервые в жизни — хорошо.' },
+            { speaker: '...', text: 'Они меняли колёса, чинили проколы, курили в перерывах. Ибрагим думал — может, это и есть жизнь. Просто работать. Просто быть рядом с другом. Просто — дышать.' },
             { speaker: '...', text: 'Потом Озон. Разгрузка машин. Работа — дом. Работа — дом. По кругу. Однообразно. Тихо.' },
             { speaker: 'Ибрагим', text: 'Я работаю как робот. Но зачем всё это?' },
             { speaker: '...', text: 'Он смотрел на небо. И впервые за долгое время — думал о Боге. Не как о наказании. Как о чём-то, что может ответить.' },
@@ -924,7 +913,7 @@ const script = {
         title: 'ФИНАЛ', subtitle: '～ Бесконечная дорога ～',
         lines: [
             { speaker: '...', text: 'Он вышел на улицу. Утро. Туман над полем. Дорога. Он шёл. Просто шёл. Без цели. Без плана. Просто — шёл.' },
-            { speaker: '...', text: 'И в этой тишине — он вдруг вспомнил всё. Маму. Бабушку. Дедушку. Роджерса. Юлю. Дашу. Ильназа. Саню. Друзей со склада. Сидр на балконе. Дым сигареты. Закат.' },
+            { speaker: '...', text: 'И в этой тишине — он вдруг вспомнил всё. Маму. Бабушку. Дедушку. Роджерса. Юлю. Дашу. Ильназа. Саню. Друзей со склада. Сидр на балконе. Дым сигареты. Закат. Светлый. Шиномонтаж.' },
             { speaker: '...', text: 'Он вспомнил, как боялся быть один. Как убеждал себя, что он один. Как строил себя на этой мысли. Как эта мысль стала его домом. Его тюрьмой.' },
             { speaker: '...', text: 'И вдруг — понял.' },
             { speaker: 'Ибрагим', text: 'Я всю жизнь думал, что я один. Но я никогда не был один.' },
@@ -946,7 +935,6 @@ const script = {
     }
 };
 
-/* ЛОГИКА */
 let currentScene = null;
 let currentLine = 0;
 let isTyping = false;
