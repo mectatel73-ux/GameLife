@@ -103,6 +103,75 @@
     #end-restart { padding: 18px 65px; font-size: 15px; background: transparent; color: #ffd966; border: 2px solid #ffd966; border-radius: 10px; cursor: pointer; font-family: 'Georgia', serif; letter-spacing: 4px; transition: 0.4s; opacity: 0; animation: fadeInText 3s 8s forwards; }
     #end-restart:hover { background: #ffd966; color: #1a0a15; }
 
+    /* ===== ТИТРЫ ===== */
+    #credits-screen {
+        position: fixed; inset: 0;
+        background: #000;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1500;
+        text-align: center;
+        overflow: hidden;
+    }
+    #credits-screen.show { display: flex; }
+
+    #credits-content {
+        animation: creditsFade 8s ease-in-out forwards;
+        padding: 40px;
+    }
+    .credit-line {
+        font-size: 14px;
+        color: #8a7060;
+        letter-spacing: 6px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        font-style: italic;
+    }
+    .credit-name {
+        font-size: 38px;
+        color: #ffd966;
+        font-family: 'Georgia', serif;
+        letter-spacing: 8px;
+        text-shadow: 0 0 40px rgba(255,200,120,0.6);
+        margin-bottom: 50px;
+    }
+
+    @keyframes creditsFade {
+        0% { opacity: 0; transform: translateY(30px); }
+        15% { opacity: 1; transform: translateY(0); }
+        80% { opacity: 1; }
+        100% { opacity: 0; }
+    }
+
+    /* Марвел-стайл галерея — резкие вспышки */
+    #credits-gallery {
+        position: fixed;
+        inset: 0;
+        display: none;
+        z-index: 1600;
+        pointer-events: none;
+        background: #000;
+    }
+    #credits-gallery.show { display: block; }
+
+    .credit-photo {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transform: scale(1.15);
+        filter: brightness(0.6) contrast(1.15) saturate(1.1);
+        transition: opacity 0.06s, transform 0.9s ease-out;
+    }
+    .credit-photo.flash {
+        opacity: 1;
+        transform: scale(1);
+    }
+
     @media (max-width: 900px) {
         #dialogue-box { min-height: 240px; padding: 20px 30px 30px; }
         #dialogue-text { font-size: 16px; }
@@ -111,6 +180,7 @@
         #start-title { font-size: 52px; letter-spacing: 8px; }
         #hud { min-width: 200px; padding: 12px 14px; }
         .hud-label { width: 80px; font-size: 10px; }
+        .credit-name { font-size: 26px; letter-spacing: 5px; }
     }
 </style>
 </head>
@@ -158,7 +228,7 @@
     <div id="chapter-title"></div>
     <div id="choices"></div>
 
-    <div id="dialogue-box" onclick="nextLine()">
+    <div id="dialogue-box">
         <div id="speaker">...</div>
         <div id="dialogue-text">...</div>
         <div id="continue-hint">▼ клик · пробел · Enter</div>
@@ -170,6 +240,23 @@
     <div id="end-text"></div>
     <div id="end-quote"></div>
     <button id="end-restart" onclick="location.reload()">НАЧАТЬ СНОВА</button>
+</div>
+
+<div id="credits-screen">
+    <div id="credits-content">
+        <div class="credit-line">Автор</div>
+        <div class="credit-name">Хузиев Ильназ</div>
+        <div class="credit-line">Главный герой</div>
+        <div class="credit-name">Ибрагим Шакирьянов</div>
+    </div>
+</div>
+
+<div id="credits-gallery">
+    <img class="credit-photo" src="ibrahim-walk.jpg" alt="">
+    <img class="credit-photo" src="childhood.jpg" alt="">
+    <img class="credit-photo" src="julia-time.jpg" alt="">
+    <img class="credit-photo" src="friends.jpg" alt="">
+    <img class="credit-photo" src="ibrahim-field.webp" alt="">
 </div>
 
 <script>
@@ -230,7 +317,7 @@ function updatePreloader() {
     }
 }
 
-// ============ АУДИО ============
+// ============ АУДИО (улучшенный гитарный синтез) ============
 let audioCtx = null;
 let currentTimer = null;
 let currentTheme = null;
@@ -242,51 +329,117 @@ function initAudio() {
 }
 
 const themes = {
-    // Тёплые, детские
-    guitar_warm:       { notes: [130.81, 164.81, 196.00, 246.94, 196.00, 164.81, 130.81, 146.83], tempo: 1.7, vol: 0.05 },
-    guitar_childhood:  { notes: [174.61, 196.00, 220.00, 246.94, 220.00, 196.00, 174.61, 164.81], tempo: 1.9, vol: 0.045 },
-
-    // Лесные, дружеские
-    guitar_forest:     { notes: [146.83, 174.61, 220.00, 261.63, 220.00, 174.61, 146.83], tempo: 2.0, vol: 0.05 },
-    guitar_friends:    { notes: [196.00, 220.00, 246.94, 293.66, 246.94, 220.00, 196.00, 174.61], tempo: 1.5, vol: 0.055 },
-    guitar_happy:      { notes: [261.63, 293.66, 329.63, 392.00, 329.63, 293.66, 261.63, 246.94], tempo: 1.3, vol: 0.06 },
-
-    // Одинокие, грустные
-    guitar_lonely:     { notes: [110.00, 146.83, 164.81, 196.00, 164.81, 146.83, 110.00], tempo: 2.6, vol: 0.04 },
-    guitar_sad:        { notes: [98.00, 130.81, 146.83, 164.81, 146.83, 130.81, 98.00], tempo: 3.0, vol: 0.038 },
-    guitar_deep:       { notes: [98.00, 123.47, 146.83, 174.61, 146.83, 123.47], tempo: 2.8, vol: 0.045 },
-    guitar_dark:       { notes: [82.41, 98.00, 110.00, 123.47, 110.00, 98.00, 82.41], tempo: 3.2, vol: 0.04 },
-    guitar_tragic:     { notes: [73.42, 87.31, 98.00, 110.00, 98.00, 87.31, 73.42], tempo: 3.5, vol: 0.035 },
-
-    // Надежда, финал
-    guitar_hope:       { notes: [196.00, 246.94, 293.66, 392.00, 293.66, 246.94, 196.00, 220.00], tempo: 1.6, vol: 0.055 },
-    guitar_dawn:       { notes: [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 261.63], tempo: 1.8, vol: 0.05 }
+    // === ДЕТСТВО, НОСТАЛЬГИЯ ===
+    guitar_childhood: {
+        notes: [196.00, 246.94, 293.66, 246.94, 196.00, 164.81, 196.00, 220.00,
+                196.00, 246.94, 293.66, 329.63, 293.66, 246.94, 196.00],
+        tempo: 1.6, vol: 0.055, style: 'finger'
+    },
+    guitar_warm: {
+        notes: [130.81, 164.81, 196.00, 246.94, 196.00, 164.81, 130.81, 146.83],
+        tempo: 1.7, vol: 0.05, style: 'finger'
+    },
+    guitar_forest: {
+        notes: [146.83, 174.61, 220.00, 261.63, 220.00, 174.61, 146.83, 196.00],
+        tempo: 2.0, vol: 0.05, style: 'finger'
+    },
+    guitar_friends: {
+        notes: [196.00, 220.00, 246.94, 293.66, 246.94, 220.00, 196.00, 174.61],
+        tempo: 1.4, vol: 0.055, style: 'strum'
+    },
+    guitar_happy: {
+        notes: [261.63, 293.66, 329.63, 392.00, 329.63, 293.66, 261.63, 246.94],
+        tempo: 1.2, vol: 0.06, style: 'strum'
+    },
+    guitar_lonely: {
+        notes: [110.00, 146.83, 164.81, 196.00, 164.81, 146.83, 110.00],
+        tempo: 2.6, vol: 0.04, style: 'finger'
+    },
+    guitar_sad: {
+        notes: [98.00, 130.81, 146.83, 164.81, 146.83, 130.81, 98.00],
+        tempo: 3.0, vol: 0.038, style: 'finger'
+    },
+    guitar_deep: {
+        notes: [98.00, 123.47, 146.83, 174.61, 146.83, 123.47, 98.00],
+        tempo: 2.8, vol: 0.045, style: 'finger'
+    },
+    guitar_dark: {
+        notes: [82.41, 98.00, 110.00, 123.47, 110.00, 98.00, 82.41],
+        tempo: 3.2, vol: 0.04, style: 'finger'
+    },
+    guitar_tragic: {
+        notes: [73.42, 87.31, 98.00, 110.00, 98.00, 87.31, 73.42],
+        tempo: 3.5, vol: 0.035, style: 'finger'
+    },
+    guitar_hope: {
+        notes: [196.00, 246.94, 293.66, 392.00, 293.66, 246.94, 196.00, 220.00],
+        tempo: 1.6, vol: 0.055, style: 'finger'
+    },
+    guitar_dawn: {
+        notes: [261.63, 329.63, 392.00, 523.25, 392.00, 329.63, 261.63],
+        tempo: 1.8, vol: 0.05, style: 'finger'
+    }
 };
 
-function playGuitarNote(freq, tempo, vol, outputNode) {
+function playGuitarNote(freq, tempo, vol, outputNode, style) {
     if (!audioCtx || !outputNode) return;
     try {
         const now = audioCtx.currentTime;
+
         const osc1 = audioCtx.createOscillator();
+        osc1.type = 'triangle';
+        osc1.frequency.value = freq;
+
         const osc2 = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.value = freq * 2;
+
+        const osc3 = audioCtx.createOscillator();
+        osc3.type = 'sine';
+        osc3.frequency.value = freq * 1.5;
+
+        const bufferSize = Math.floor(audioCtx.sampleRate * 0.04);
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 4);
+        }
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+
         const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 2400;
+        filter.Q.value = 0.6;
 
-        osc1.type = 'triangle'; osc1.frequency.value = freq;
-        osc2.type = 'sine'; osc2.frequency.value = freq * 2;
+        const gain = audioCtx.createGain();
+        const gain2 = audioCtx.createGain();
+        const gain3 = audioCtx.createGain();
+        const noiseGain = audioCtx.createGain();
 
-        filter.type = 'lowpass'; filter.frequency.value = 1800; filter.Q.value = 0.7;
+        gain2.gain.value = 0.35;
+        gain3.gain.value = 0.15;
+        noiseGain.gain.value = (style === 'strum') ? 0.25 : 0.15;
 
+        const attack = 0.004;
+        const decay = tempo * 1.6;
         gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(vol, now + 0.005);
-        gain.gain.exponentialRampToValueAtTime(vol * 0.7, now + 0.15);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + tempo * 1.8);
+        gain.gain.linearRampToValueAtTime(vol, now + attack);
+        gain.gain.exponentialRampToValueAtTime(vol * 0.6, now + 0.08);
+        gain.gain.exponentialRampToValueAtTime(vol * 0.25, now + 0.4);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + decay);
 
-        osc1.connect(filter); osc2.connect(filter);
-        filter.connect(gain); gain.connect(outputNode);
+        osc1.connect(filter);
+        osc2.connect(gain2); gain2.connect(filter);
+        osc3.connect(gain3); gain3.connect(filter);
+        noise.connect(noiseGain); noiseGain.connect(filter);
+        filter.connect(gain);
+        gain.connect(outputNode);
 
-        osc1.start(now); osc2.start(now);
-        osc1.stop(now + tempo * 2); osc2.stop(now + tempo * 2);
+        osc1.start(now); osc2.start(now); osc3.start(now); noise.start(now);
+        osc1.stop(now + decay + 0.5);
+        osc2.stop(now + decay + 0.5);
+        osc3.stop(now + decay + 0.5);
     } catch(e) {}
 }
 
@@ -294,7 +447,6 @@ function playTheme(themeName) {
     if (!audioCtx) return;
     if (currentTheme === themeName) return;
 
-    // Плавно гасим старую тему
     if (masterGain) {
         const oldGain = masterGain;
         const fadeOut = setInterval(() => {
@@ -328,7 +480,7 @@ function playTheme(themeName) {
 
     function playNote() {
         if (currentTheme !== themeName) return;
-        playGuitarNote(t.notes[idx % t.notes.length], t.tempo, t.vol, masterGain);
+        playGuitarNote(t.notes[idx % t.notes.length], t.tempo, t.vol, masterGain, t.style);
         idx++;
     }
 
@@ -905,8 +1057,11 @@ function showScene(sceneName) {
 
     const darkOverlay = document.getElementById('chapter-dark');
     const silenceOverlay = document.getElementById('silence-dark');
+    const box = document.getElementById('dialogue-box');
 
     if (scene.silence) {
+        box.style.pointerEvents = 'none';
+        box.style.opacity = '0';
         silenceOverlay.classList.add('show');
         darkOverlay.classList.add('show');
         setTimeout(() => {
@@ -921,16 +1076,14 @@ function showScene(sceneName) {
                 btn.onclick = (e) => { e.stopPropagation(); selectChoice(ch); };
                 choicesEl.appendChild(btn);
             });
-            document.getElementById('dialogue-box').style.opacity = '0';
-            document.getElementById('speaker').style.opacity = '0';
         }, 2000);
     } else if (scene.title) {
         showChapterTitle(scene.title, scene.subtitle, () => {
             renderLine();
         });
     } else {
-        document.getElementById('dialogue-box').style.opacity = '1';
-        document.getElementById('speaker').style.opacity = '1';
+        box.style.opacity = '1';
+        box.style.pointerEvents = 'auto';
         renderLine();
     }
 }
@@ -941,13 +1094,16 @@ function showChapterTitle(title, subtitle, callback) {
     titleEl.classList.add('show');
     const dark = document.getElementById('chapter-dark');
     dark.classList.add('show');
+    const box = document.getElementById('dialogue-box');
+    box.style.pointerEvents = 'none';
+    box.style.opacity = '0';
 
     setTimeout(() => {
         titleEl.classList.remove('show');
         dark.classList.remove('show');
         setTimeout(() => {
-            document.getElementById('dialogue-box').style.opacity = '1';
-            document.getElementById('speaker').style.opacity = '1';
+            box.style.opacity = '1';
+            box.style.pointerEvents = 'auto';
             callback();
         }, 1500);
     }, 4000);
@@ -1079,25 +1235,100 @@ function setBackground(bgName) {
     img.src = url;
 }
 
+// ============ ФИНАЛ + ТИТРЫ ============
 function showEnding(scene) {
-    const endScreen = document.getElementById('end-screen');
     document.getElementById('end-title').textContent = scene.endTitle || 'КОНЕЦ';
     document.getElementById('end-text').textContent = scene.endText || '';
     document.getElementById('end-quote').textContent = scene.endQuote || '';
     document.getElementById('game').style.opacity = '0';
-    setTimeout(() => { endScreen.classList.add('show'); }, 1500);
+
+    setTimeout(() => {
+        document.getElementById('end-screen').classList.add('show');
+
+        // Через 10 секунд — титры
+        setTimeout(() => {
+            startCredits();
+        }, 10000);
+    }, 1500);
 }
 
+function startCredits() {
+    // Останавливаем музыку
+    stopTheme();
+
+    // Скрываем финальный экран
+    document.getElementById('end-screen').classList.remove('show');
+
+    // Показываем титры
+    const credits = document.getElementById('credits-screen');
+    credits.classList.add('show');
+
+    // Через 8 секунд — галерея (марвел-стайл)
+    setTimeout(() => {
+        credits.classList.remove('show');
+        startCreditsGallery();
+    }, 8000);
+}
+
+function startCreditsGallery() {
+    const gallery = document.getElementById('credits-gallery');
+    const photos = gallery.querySelectorAll('.credit-photo');
+    gallery.classList.add('show');
+
+    // Запускаем музыку «Спектакль окончен»
+    playCreditsMusic();
+
+    let idx = 0;
+    function flashNext() {
+        if (idx >= photos.length) {
+            // Конец — оставляем последнюю фотку на экране
+            return;
+        }
+
+        // Резкая вспышка — предыдущие исчезают мгновенно
+        photos.forEach(p => p.classList.remove('flash'));
+
+        // Показываем новую
+        photos[idx].classList.add('flash');
+        idx++;
+
+        // Интервал между вспышками — 1.2 секунды
+        setTimeout(flashNext, 1200);
+    }
+
+    flashNext();
+}
+
+// Музыка титров — mp3
+let creditsAudio = null;
+function playCreditsMusic() {
+    if (creditsAudio) return;
+    try {
+        creditsAudio = new Audio('spectacle.mp3');
+        creditsAudio.volume = 0.5;
+        creditsAudio.play().catch(() => {});
+    } catch(e) {}
+}
+
+// ============ ОБРАБОТЧИКИ ============
 document.addEventListener('keydown', (e) => {
     if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
+        const box = document.getElementById('dialogue-box');
+        if (box.style.pointerEvents === 'none') return;
+        if (box.style.opacity === '0') return;
         nextLine();
     }
 });
 
 document.addEventListener('click', (e) => {
     if (e.target.closest('#choices')) return;
-    if (e.target.closest('#dialogue-box')) { nextLine(); }
+    if (e.target.closest('#dialogue-box')) {
+        const box = document.getElementById('dialogue-box');
+        if (box.style.pointerEvents === 'none') return;
+        if (box.style.opacity === '0') return;
+        nextLine();
+    }
 });
 
 window.addEventListener('load', async () => {
