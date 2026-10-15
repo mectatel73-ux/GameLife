@@ -145,7 +145,38 @@
         100% { opacity: 0; }
     }
 
-    /* Марвел-стайл галерея — резкие вспышки */
+    /* Кнопка продолжения */
+    #credits-btn-screen {
+        position: fixed;
+        inset: 0;
+        background: #000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1550;
+    }
+    #credits-btn-screen.show { display: flex; }
+
+    #credits-continue-btn {
+        padding: 24px 80px;
+        font-size: 18px;
+        background: transparent;
+        color: #ffd966;
+        border: 2px solid #ffd966;
+        border-radius: 12px;
+        cursor: pointer;
+        font-family: 'Georgia', serif;
+        letter-spacing: 6px;
+        transition: all 0.4s;
+        box-shadow: 0 0 40px rgba(255,200,120,0.4);
+    }
+    #credits-continue-btn:hover {
+        background: #ffd966;
+        color: #1a0a15;
+        box-shadow: 0 0 80px rgba(255,200,120,0.9);
+    }
+
+    /* Марвел-стайл галерея */
     #credits-gallery {
         position: fixed;
         inset: 0;
@@ -251,6 +282,10 @@
     </div>
 </div>
 
+<div id="credits-btn-screen">
+    <button id="credits-continue-btn">▶ ПРОДОЛЖИТЬ</button>
+</div>
+
 <div id="credits-gallery">
     <img class="credit-photo" src="ibrahim-walk.jpg" alt="">
     <img class="credit-photo" src="childhood.jpg" alt="">
@@ -317,7 +352,7 @@ function updatePreloader() {
     }
 }
 
-// ============ АУДИО (улучшенный гитарный синтез) ============
+// ============ АУДИО ============
 let audioCtx = null;
 let currentTimer = null;
 let currentTheme = null;
@@ -329,7 +364,6 @@ function initAudio() {
 }
 
 const themes = {
-    // === ДЕТСТВО, НОСТАЛЬГИЯ ===
     guitar_childhood: {
         notes: [196.00, 246.94, 293.66, 246.94, 196.00, 164.81, 196.00, 220.00,
                 196.00, 246.94, 293.66, 329.63, 293.66, 246.94, 196.00],
@@ -523,12 +557,7 @@ const script = {
             { speaker: '...', text: 'А жизнь — говорила с ним. Всю жизнь. Тишиной. Людьми. Потерями. Мелочами. Но Ибрагим — не слышал. Не видел. Просто шёл.' },
             { speaker: '...', text: 'Это история о его дороге. О знаках, которые он не замечал. И о том, что в самом конце — он оглянулся. И увидел всё.' }
         ],
-        choices: [{ text: 'Начать', next: 'silence1' }]
-    },
-
-    silence1: {
-        bg: 'childhood.jpg', theme: 'guitar_lonely', silence: true, lines: [],
-        choices: [{ text: '...', next: 'ch1' }]
+        choices: [{ text: 'Начать', next: 'ch1' }]
     },
 
     ch1: {
@@ -589,8 +618,8 @@ const script = {
             { speaker: '...', text: 'Так появилась его первая маска. И он не знал, что будет носить её всю жизнь.' }
         ],
         choices: [
-            { text: '«Я стану лучше. Назло ей.»', next: 'silence2', hope: +10, mask: +15 },
-            { text: '«Мне никто не нужен. Никогда.»', next: 'silence2', hope: -15, mask: +20, pain: +10 },
+            { text: '«Я стану лучше. Назло ей.»', next: 'ch2', hope: +10, mask: +15 },
+            { text: '«Мне никто не нужен. Никогда.»', next: 'ch2', hope: -15, mask: +20, pain: +10 },
             { text: '⟳ А что, если бы я подошёл иначе?', next: 'pribit_amina', pribit: true }
         ]
     },
@@ -605,12 +634,7 @@ const script = {
             { speaker: 'Ибрагим', text: 'Значит, это не моя вина. Значит, так было надо. И я не мог это изменить.' }
         ],
         needs: { pain: -10, faith: +5, hope: +5 },
-        choices: [{ text: 'Вернуться', next: 'silence2' }]
-    },
-
-    silence2: {
-        bg: 'childhood.jpg', theme: 'guitar_lonely', silence: true, lines: [],
-        choices: [{ text: '...', next: 'ch2' }]
+        choices: [{ text: 'Вернуться', next: 'ch2' }]
     },
 
     ch2: {
@@ -658,8 +682,8 @@ const script = {
         needs: { pain: +20 },
         choices: [
             { text: '⟳ Что, если бы я не поверил?', next: 'pribit_julia', pribit: true },
-            { text: '«Я буду помнить её. Всегда.»', next: 'silence_school', faith: +10 },
-            { text: '«Значит, все уходят. Значит, я один.»', next: 'silence_school', pain: +15, hope: -10 }
+            { text: '«Я буду помнить её. Всегда.»', next: 'ch_school', faith: +10 },
+            { text: '«Значит, все уходят. Значит, я один.»', next: 'ch_school', pain: +15, hope: -10 }
         ]
     },
 
@@ -674,7 +698,7 @@ const script = {
         needs: { pain: +15, hope: -10 },
         choices: [
             { text: '⟳ Что, если бы я не поверил?', next: 'pribit_julia', pribit: true },
-            { text: 'Принять. Жить дальше.', next: 'silence_school' }
+            { text: 'Принять. Жить дальше.', next: 'ch_school' }
         ]
     },
 
@@ -688,12 +712,7 @@ const script = {
             { speaker: 'Ибрагим', text: 'Значит, я не виноват. Значит, её боль была сильнее меня.' }
         ],
         needs: { pain: -10, faith: +10 },
-        choices: [{ text: 'Вернуться', next: 'silence_school' }]
-    },
-
-    silence_school: {
-        bg: 'julia-izhevsk.jpg', theme: 'guitar_lonely', silence: true, lines: [],
-        choices: [{ text: '...', next: 'ch_school' }]
+        choices: [{ text: 'Вернуться', next: 'ch_school' }]
     },
 
     ch_school: {
@@ -710,14 +729,9 @@ const script = {
             { speaker: '...', text: 'Но ответа не было. И он просто продолжал. Как все. Как робот. Как тень.' }
         ],
         choices: [
-            { text: '«Может, дальше будет лучше.»', next: 'silence3', hope: +10, faith: +5 },
-            { text: '«Вряд ли. Всё одно и то же.»', next: 'silence3', mask: +5, hope: -5 }
+            { text: '«Может, дальше будет лучше.»', next: 'ch3', hope: +10, faith: +5 },
+            { text: '«Вряд ли. Всё одно и то же.»', next: 'ch3', mask: +5, hope: -5 }
         ]
-    },
-
-    silence3: {
-        bg: 'school.webp', theme: 'guitar_lonely', silence: true, lines: [],
-        choices: [{ text: '...', next: 'ch3' }]
     },
 
     ch3: {
@@ -745,15 +759,10 @@ const script = {
             { speaker: '...', text: 'Ильназ не уходил. Никогда.' }
         ],
         choices: [
-            { text: '«Ильназ — мой лучший друг.»', next: 'silence4', hope: +15 },
-            { text: '«Дружба — это не про меня.»', next: 'silence4', hope: -10, mask: +10 },
-            { text: '«Спасибо, что ты рядом.»', next: 'silence4', hope: +20, faith: +5 }
+            { text: '«Ильназ — мой лучший друг.»', next: 'ch4', hope: +15 },
+            { text: '«Дружба — это не про меня.»', next: 'ch4', hope: -10, mask: +10 },
+            { text: '«Спасибо, что ты рядом.»', next: 'ch4', hope: +20, faith: +5 }
         ]
-    },
-
-    silence4: {
-        bg: 'ilnaz.jpg', theme: 'guitar_lonely', silence: true, lines: [],
-        choices: [{ text: '...', next: 'ch4' }]
     },
 
     ch4: {
@@ -796,8 +805,8 @@ const script = {
         ],
         choices: [
             { text: '⟳ Что, если бы я сказал хоть что-то?', next: 'pribit_dasha', pribit: true },
-            { text: '«Может, это и было правильно. Может, так надо.»', next: 'silence_julia_end', lost: +10 },
-            { text: '«Я больше никого не подпущу. Никогда.»', next: 'silence_julia_end', mask: +20, hope: -15, pain: +10 }
+            { text: '«Может, это и было правильно. Может, так надо.»', next: 'ch_julia_end', lost: +10 },
+            { text: '«Я больше никого не подпущу. Никогда.»', next: 'ch_julia_end', mask: +20, hope: -15, pain: +10 }
         ]
     },
 
@@ -811,12 +820,7 @@ const script = {
             { speaker: 'Ибрагим', text: 'Значит, я не виноват. И она не виновата. Просто — так вышло.' }
         ],
         needs: { pain: -5, faith: +5 },
-        choices: [{ text: 'Вернуться', next: 'silence_julia_end' }]
-    },
-
-    silence_julia_end: {
-        bg: 'dasha-time.jpg', theme: 'guitar_lonely', silence: true, lines: [],
-        choices: [{ text: '...', next: 'ch_julia_end' }]
+        choices: [{ text: 'Вернуться', next: 'ch_julia_end' }]
     },
 
     ch_julia_end: {
@@ -859,8 +863,8 @@ const script = {
         ],
         choices: [
             { text: '⟳ А если бы я остался?', next: 'pribit_julia_final', pribit: true },
-            { text: '«Я не виноват. Но легче не будет.»', next: 'silence_svetly', pain: +20 },
-            { text: '«Значит, я и её не удержал. Значит, я — проклятый.»', next: 'silence_svetly', pain: +25, hope: -20, mask: +15 }
+            { text: '«Я не виноват. Но легче не будет.»', next: 'ch5', pain: +20 },
+            { text: '«Значит, я и её не удержал. Значит, я — проклятый.»', next: 'ch5', pain: +25, hope: -20, mask: +15 }
         ]
     },
 
@@ -875,12 +879,7 @@ const script = {
             { speaker: 'Ибрагим', text: 'Значит, я не виноват. Значит, я сделал всё, что мог. Значит, пора — отпустить.' }
         ],
         needs: { pain: -10, faith: +10 },
-        choices: [{ text: 'Вернуться', next: 'silence_svetly' }]
-    },
-
-    silence_svetly: {
-        bg: 'julia-end.jpg', theme: 'guitar_tragic', silence: true, lines: [],
-        choices: [{ text: '...', next: 'ch5' }]
+        choices: [{ text: 'Вернуться', next: 'ch5' }]
     },
 
     ch5: {
@@ -933,22 +932,15 @@ const script = {
             { speaker: '...', text: 'Он пошёл. И это был один из лучших дней в его жизни.' },
             { speaker: '...', text: 'Они ехали в электричке. Потом шли пешком через лес. С рюкзаками. С палатками. С гитарой. Ильназ, Искандер, ещё пара знакомых. Все — молодые. Все — весёлые.' },
             { speaker: '...', text: 'У озера разбили палатку. Разожгли костёр. Ели печёную картошку. Пили сидр из бутылок. Смеялись над глупыми шутками.' },
-            { speaker: '...', text: 'Ильназ играл на гитаре. Кто-то пел. Кто-то молчал и смотрел в огонь.' }
-        ],
-        choices: [{ text: '...', next: 'ch5_friends_field' }]
-    },
-
-    ch5_friends_field: {
-        bg: 'ibrahim 1.webp', theme: 'guitar_happy',
-        lines: [
-            { speaker: '...', text: 'А потом Ибрагим просто лёг на траву. Прямо у дороги. Раскинул руки. И смотрел в небо. Долго. Очень долго.' },
+            { speaker: '...', text: 'Ильназ играл на гитаре. Кто-то пел. Кто-то молчал и смотрел в огонь.' },
+            { speaker: '...', text: 'А потом Ибрагим просто лёг на траву. Прямо у дороги. Раскинул руки. И смотрел в небо. Долго. Очень долго.', bg: 'ibrahim 1.webp', theme: 'guitar_happy' },
             { speaker: '...', text: 'Звёзды зажглись одна за другой. Ильназ играл на гитаре. Ибрагим слушал. И думал: может, вот оно?' },
             { speaker: 'Ибрагим', text: 'Может, счастье — это просто быть здесь. С ними. Сейчас.' },
             { speaker: '...', text: 'Он запомнил этот вечер. На всю жизнь. Как доказательство. Что было хорошо. Что было по-настоящему.' },
             { speaker: '...', text: 'Даже когда потом стало плохо — этот вечер остался. Как свет в темноте. Как точка опоры.' }
         ],
         needs: { hope: +15, pain: -10, mask: -10 },
-        choices: [{ text: 'Вспоминать это. Всегда.', next: 'silence6', faith: +10 }]
+        choices: [{ text: 'Вспоминать это. Всегда.', next: 'ch7', faith: +10 }]
     },
 
     ch5_smoke: {
@@ -961,12 +953,7 @@ const script = {
             { speaker: '...', text: 'Он докурил. Потушил окурок. И пошёл спать. На матрас. На полу. В пустой квартире.' }
         ],
         needs: { pain: +5, lost: +5 },
-        choices: [{ text: 'Заснуть', next: 'silence6' }]
-    },
-
-    silence6: {
-        bg: 'svetly.jpg', theme: 'guitar_lonely', silence: true, lines: [],
-        choices: [{ text: '...', next: 'ch7' }]
+        choices: [{ text: 'Заснуть', next: 'ch7' }]
     },
 
     ch7: {
@@ -983,14 +970,9 @@ const script = {
             { speaker: '...', text: 'Это был первый раз, когда он ушёл — не убегая. А отпуская.' }
         ],
         choices: [
-            { text: '«Я справился. Я выдержал.»', next: 'silence8', hope: +15, faith: +10 },
-            { text: '«Я всё ещё пустой. Но я стою.»', next: 'silence8', hope: +5 }
+            { text: '«Я справился. Я выдержал.»', next: 'ch9', hope: +15, faith: +10 },
+            { text: '«Я всё ещё пустой. Но я стою.»', next: 'ch9', hope: +5 }
         ]
-    },
-
-    silence8: {
-        bg: 'stroyka.jpg', theme: 'guitar_lonely', silence: true, lines: [],
-        choices: [{ text: '...', next: 'ch9' }]
     },
 
     ch9: {
@@ -1055,35 +1037,13 @@ function showScene(sceneName) {
     if (scene.bg) { setBackground(scene.bg); }
     if (scene.theme) { playTheme(scene.theme); }
 
-    const darkOverlay = document.getElementById('chapter-dark');
-    const silenceOverlay = document.getElementById('silence-dark');
-    const box = document.getElementById('dialogue-box');
-
-    if (scene.silence) {
-        box.style.pointerEvents = 'none';
-        box.style.opacity = '0';
-        silenceOverlay.classList.add('show');
-        darkOverlay.classList.add('show');
-        setTimeout(() => {
-            silenceOverlay.classList.remove('show');
-            darkOverlay.classList.remove('show');
-            const choicesEl = document.getElementById('choices');
-            choicesEl.innerHTML = '';
-            scene.choices.forEach(ch => {
-                const btn = document.createElement('button');
-                btn.className = 'choice-btn';
-                btn.textContent = ch.text;
-                btn.onclick = (e) => { e.stopPropagation(); selectChoice(ch); };
-                choicesEl.appendChild(btn);
-            });
-        }, 2000);
-    } else if (scene.title) {
+    if (scene.title) {
         showChapterTitle(scene.title, scene.subtitle, () => {
             renderLine();
         });
     } else {
-        box.style.opacity = '1';
-        box.style.pointerEvents = 'auto';
+        document.getElementById('dialogue-box').style.opacity = '1';
+        document.getElementById('dialogue-box').style.pointerEvents = 'auto';
         renderLine();
     }
 }
@@ -1245,7 +1205,6 @@ function showEnding(scene) {
     setTimeout(() => {
         document.getElementById('end-screen').classList.add('show');
 
-        // Через 10 секунд — титры
         setTimeout(() => {
             startCredits();
         }, 10000);
@@ -1253,20 +1212,22 @@ function showEnding(scene) {
 }
 
 function startCredits() {
-    // Останавливаем музыку
     stopTheme();
-
-    // Скрываем финальный экран
     document.getElementById('end-screen').classList.remove('show');
 
-    // Показываем титры
     const credits = document.getElementById('credits-screen');
     credits.classList.add('show');
 
-    // Через 8 секунд — галерея (марвел-стайл)
     setTimeout(() => {
         credits.classList.remove('show');
-        startCreditsGallery();
+
+        const btnScreen = document.getElementById('credits-btn-screen');
+        btnScreen.classList.add('show');
+
+        document.getElementById('credits-continue-btn').onclick = () => {
+            btnScreen.classList.remove('show');
+            startCreditsGallery();
+        };
     }, 8000);
 }
 
@@ -1275,39 +1236,34 @@ function startCreditsGallery() {
     const photos = gallery.querySelectorAll('.credit-photo');
     gallery.classList.add('show');
 
-    // Запускаем музыку «Спектакль окончен»
     playCreditsMusic();
 
     let idx = 0;
     function flashNext() {
-        if (idx >= photos.length) {
-            // Конец — оставляем последнюю фотку на экране
-            return;
-        }
-
-        // Резкая вспышка — предыдущие исчезают мгновенно
+        if (idx >= photos.length) return;
         photos.forEach(p => p.classList.remove('flash'));
-
-        // Показываем новую
         photos[idx].classList.add('flash');
         idx++;
-
-        // Интервал между вспышками — 1.2 секунды
         setTimeout(flashNext, 1200);
     }
-
     flashNext();
 }
 
-// Музыка титров — mp3
 let creditsAudio = null;
 function playCreditsMusic() {
     if (creditsAudio) return;
     try {
-        creditsAudio = new Audio('spectacle.mp3');
+        creditsAudio = new Audio('Chernikovskaya_Hata_-_Spektakl_Okonchen_69749630.mp3');
         creditsAudio.volume = 0.5;
-        creditsAudio.play().catch(() => {});
-    } catch(e) {}
+        creditsAudio.loop = false;
+        const p = creditsAudio.play();
+        if (p !== undefined) {
+            p.then(() => console.log('Музыка титров играет'))
+             .catch(err => console.warn('Музыка не запустилась:', err));
+        }
+    } catch(e) {
+        console.error('Ошибка аудио:', e);
+    }
 }
 
 // ============ ОБРАБОТЧИКИ ============
