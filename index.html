@@ -93,16 +93,6 @@
     #start-btn:hover { transform: scale(1.06); box-shadow: 0 0 100px rgba(255,200,120,1); }
     #start-hint { margin-top: 60px; color: #6a5060; font-size: 13px; font-style: italic; letter-spacing: 2px; max-width: 600px; line-height: 1.9; }
 
-    #end-screen { position: fixed; inset: 0; background: radial-gradient(ellipse at center, #2a1a2e 0%, #0a0510 100%); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 999; padding: 40px; text-align: center; }
-    #end-screen.show { display: flex; animation: fadeIn 5s; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    #end-title { font-size: 62px; color: #ffd966; margin-bottom: 50px; letter-spacing: 14px; font-family: 'Georgia', serif; text-shadow: 0 0 80px rgba(255,200,120,0.8); opacity: 0; animation: fadeInText 3s 1s forwards; }
-    @keyframes fadeInText { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    #end-text { font-size: 22px; color: #d0c0e0; max-width: 850px; line-height: 2.1; font-style: italic; margin-bottom: 50px; opacity: 0; animation: fadeInText 3s 2.5s forwards; }
-    #end-quote { font-size: 21px; color: #ffd966; max-width: 850px; line-height: 1.9; font-family: 'Georgia', serif; margin-bottom: 50px; padding: 30px 40px; border-left: 3px solid #ffd966; border-right: 3px solid #ffd966; opacity: 0; animation: fadeInText 4s 5s forwards; font-style: italic; }
-    #end-restart { padding: 18px 65px; font-size: 15px; background: transparent; color: #ffd966; border: 2px solid #ffd966; border-radius: 10px; cursor: pointer; font-family: 'Georgia', serif; letter-spacing: 4px; transition: 0.4s; opacity: 0; animation: fadeInText 3s 8s forwards; }
-    #end-restart:hover { background: #ffd966; color: #1a0a15; }
-
     /* ===== ТИТРЫ ===== */
     #credits-screen {
         position: fixed; inset: 0;
@@ -117,90 +107,48 @@
     }
     #credits-screen.show { display: flex; }
 
-    #credits-content {
-        animation: creditsFade 8s ease-in-out forwards;
-        padding: 40px;
-    }
-    .credit-line {
-        font-size: 14px;
-        color: #8a7060;
-        letter-spacing: 6px;
-        text-transform: uppercase;
-        margin-bottom: 8px;
-        font-style: italic;
-    }
-    .credit-name {
-        font-size: 38px;
-        color: #ffd966;
-        font-family: 'Georgia', serif;
-        letter-spacing: 8px;
-        text-shadow: 0 0 40px rgba(255,200,120,0.6);
-        margin-bottom: 50px;
-    }
-
-    @keyframes creditsFade {
-        0% { opacity: 0; transform: translateY(30px); }
-        15% { opacity: 1; transform: translateY(0); }
-        80% { opacity: 1; }
-        100% { opacity: 0; }
-    }
-
-    /* Кнопка продолжения */
-    #credits-btn-screen {
-        position: fixed;
+    /* Фото-фон, бесконечно сменяющиеся */
+    #credits-bg {
+        position: absolute;
         inset: 0;
-        background: #000;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 1550;
-    }
-    #credits-btn-screen.show { display: flex; }
-
-    #credits-continue-btn {
-        padding: 24px 80px;
-        font-size: 18px;
-        background: transparent;
-        color: #ffd966;
-        border: 2px solid #ffd966;
-        border-radius: 12px;
-        cursor: pointer;
-        font-family: 'Georgia', serif;
-        letter-spacing: 6px;
-        transition: all 0.4s;
-        box-shadow: 0 0 40px rgba(255,200,120,0.4);
-    }
-    #credits-continue-btn:hover {
-        background: #ffd966;
-        color: #1a0a15;
-        box-shadow: 0 0 80px rgba(255,200,120,0.9);
-    }
-
-    /* Марвел-стайл галерея */
-    #credits-gallery {
-        position: fixed;
-        inset: 0;
-        display: none;
-        z-index: 1600;
-        pointer-events: none;
+        z-index: 0;
         background: #000;
     }
-    #credits-gallery.show { display: block; }
-
-    .credit-photo {
+    .credits-bg-photo {
         position: absolute;
         inset: 0;
         width: 100%;
         height: 100%;
         object-fit: cover;
         opacity: 0;
-        transform: scale(1.15);
-        filter: brightness(0.6) contrast(1.15) saturate(1.1);
-        transition: opacity 0.06s, transform 0.9s ease-out;
+        filter: brightness(0.35) contrast(1.1) saturate(1.1);
+        transition: opacity 0.15s ease;
     }
-    .credit-photo.flash {
+    .credits-bg-photo.active {
         opacity: 1;
-        transform: scale(1);
+    }
+
+    #credits-content {
+        position: relative;
+        z-index: 2;
+        padding: 40px;
+        text-shadow: 0 0 60px rgba(0,0,0,0.95), 0 4px 30px rgba(0,0,0,1);
+    }
+    .credit-line {
+        font-size: 14px;
+        color: #c8a878;
+        letter-spacing: 6px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+        font-style: italic;
+    }
+    .credit-name {
+        font-size: 44px;
+        color: #ffd966;
+        font-family: 'Georgia', serif;
+        letter-spacing: 10px;
+        text-shadow: 0 0 60px rgba(255,200,120,0.9), 0 6px 40px rgba(0,0,0,1);
+        margin-bottom: 60px;
     }
 
     @media (max-width: 900px) {
@@ -266,32 +214,14 @@
     </div>
 </div>
 
-<div id="end-screen">
-    <div id="end-title">КОНЕЦ</div>
-    <div id="end-text"></div>
-    <div id="end-quote"></div>
-    <button id="end-restart" onclick="location.reload()">НАЧАТЬ СНОВА</button>
-</div>
-
 <div id="credits-screen">
+    <div id="credits-bg"></div>
     <div id="credits-content">
         <div class="credit-line">Автор</div>
         <div class="credit-name">Хузиев Ильназ</div>
         <div class="credit-line">Главный герой</div>
         <div class="credit-name">Ибрагим Шакирьянов</div>
     </div>
-</div>
-
-<div id="credits-btn-screen">
-    <button id="credits-continue-btn">▶ ПРОДОЛЖИТЬ</button>
-</div>
-
-<div id="credits-gallery">
-    <img class="credit-photo" src="ibrahim-walk.jpg" alt="">
-    <img class="credit-photo" src="childhood.jpg" alt="">
-    <img class="credit-photo" src="julia-time.jpg" alt="">
-    <img class="credit-photo" src="friends.jpg" alt="">
-    <img class="credit-photo" src="ibrahim-field.webp" alt="">
 </div>
 
 <script>
@@ -419,15 +349,12 @@ function playGuitarNote(freq, tempo, vol, outputNode, style) {
     if (!audioCtx || !outputNode) return;
     try {
         const now = audioCtx.currentTime;
-
         const osc1 = audioCtx.createOscillator();
         osc1.type = 'triangle';
         osc1.frequency.value = freq;
-
         const osc2 = audioCtx.createOscillator();
         osc2.type = 'sine';
         osc2.frequency.value = freq * 2;
-
         const osc3 = audioCtx.createOscillator();
         osc3.type = 'sine';
         osc3.frequency.value = freq * 1.5;
@@ -729,14 +656,89 @@ const script = {
             { speaker: '...', text: 'Но ответа не было. И он просто продолжал. Как все. Как робот. Как тень.' }
         ],
         choices: [
-            { text: '«Может, дальше будет лучше.»', next: 'ch3', hope: +10, faith: +5 },
-            { text: '«Вряд ли. Всё одно и то же.»', next: 'ch3', mask: +5, hope: -5 }
+            { text: '«Может, дальше будет лучше.»', next: 'ch5', hope: +10, faith: +5 },
+            { text: '«Вряд ли. Всё одно и то же.»', next: 'ch5', mask: +5, hope: -5 }
         ]
+    },
+
+    ch5: {
+        bg: 'svetly.jpg', theme: 'guitar_lonely',
+        title: 'ГЛАВА IV', subtitle: '～ Светлый ～',
+        lines: [
+            { speaker: '...', text: 'Мама взяла ипотеку. В Светлом — посёлке под Казанью. И они переехали туда. Первая квартира в его жизни. Своя.' },
+            { speaker: '...', text: 'Но пустая. Голые стены. Бетон. Никакого ремонта. Матрас прямо на полу. Туалет — без двери. Только проём. И шторка, которую он так и не повесил.' },
+            { speaker: '...', text: 'Мама уехала в Москву — зарабатывать. Ибрагим остался один в этой пустой квартире. И ему это нравилось. Потому что никого не надо было видеть. Никого — не надо было бояться потерять.' },
+            { speaker: '...', text: 'Квартира была отражением его души. Голая. Холодная. Без ремонта. Он не хотел её обживать. Не хотел вкладывать силы. Не хотел превращать в «дом».' },
+            { speaker: '...', text: 'Потому что дом — это когда знаешь, что останешься. А он не знал. И не хотел знать.' },
+            { speaker: '...', text: 'Он снова работал курьером. С Ильназом. Потом — с Искандером. Весёлые были времена. Дерзкие. Молодые. Они смеялись над всем. Над собой. Над миром.' },
+            { speaker: '...', text: 'А потом — шиномонтаж. Гараж на окраине. Запах резины и масла. Гора покрышек во дворе. Ржавый подъёмник. И музыка из старого радио.', bg: 'shinka.jpg', theme: 'guitar_friends' },
+            { speaker: '...', text: 'Ильназ — убийца колёс. Он умудрялся сломать то, что сломать невозможно. Но делал это с таким энтузиазмом, что никто не злился. Ибрагим — вечно болел. Простужался каждый месяц. Но работал.' },
+            { speaker: '...', text: 'Они меняли колёса, чинили проколы, курили в перерывах. Иногда заходили знакомые. Иногда просто сидели молча.' },
+            { speaker: 'Ибрагим', text: 'Может, это и есть жизнь? Просто — работать. Смеяться. Быть с друзьями.' },
+            { speaker: '...', text: 'Он не знал ответа. Но в эти моменты — в гараже, с покрышками, с Ильназом — ему было хорошо. По-настоящему.' },
+            { speaker: '...', text: 'А потом была стройка. В Ижевске. У Тимура. Зимой.', bg: 'svetly.jpg', theme: 'guitar_lonely' },
+            { speaker: '...', text: 'Минус тридцать. Утро. Тёмное небо. Иней на ресницах. Пар изо рта. Работали в ватниках, в шапках-ушанках, в валенках. Но всё равно мёрзли.' },
+            { speaker: '...', text: 'Тимур — прораб. Мужик лет сорока. Молчаливый. Смеялся редко. Но если смеялся — громко. И все смеялись вместе с ним.' },
+            { speaker: 'Тимур', text: 'Ибрагим, не спи. Раствор стынет.' },
+            { speaker: 'Ибрагим', text: 'Иду, иду.' },
+            { speaker: '...', text: 'Он мешал цемент. Кирпичи были тяжелее, чем казалось. Пальцы не сгибались. Перчатки не спасали. Но он работал. Молча. Как робот.' },
+            { speaker: '...', text: 'В обед — перерыв. Все сидели в вагончике. Пили чай из термоса. Курили. Молчали. Каждый думал о своём.' },
+            { speaker: 'Ибрагим', text: 'Я устал. Но не так, как от Озона. По-другому. Как будто тело болит — а душа нет. И это — лучше.' },
+            { speaker: '...', text: 'Он проработал там месяц. Тридцать дней. Минус тридцать каждый день. А потом — ушёл. Как всегда. Никого не предупредив. Просто не пришёл однажды.' },
+            { speaker: '...', text: 'Это была его суперсила — уходить. И его проклятие.' },
+            { speaker: '...', text: 'Он вернулся в Ижевск. К бабушке и дедушке. Они старели. Он это видел. И боялся.' },
+            { speaker: '...', text: 'А потом ушла бабушка. Рак. Она умирала долго. Он приезжал каждый месяц. Сидел у её кровати. Держал за руку.' },
+            { speaker: '...', text: 'Она уже почти не говорила. Только смотрела. И иногда — еле слышно — произносила: «Ибраһим, чәй эчәрсеңме?».' },
+            { speaker: '...', text: 'И он кивал. И наливал ей чай. И держал её за руку. Долго. Очень долго.' },
+            { speaker: '...', text: 'А в последний раз — она не сказала ничего. Просто сжала его руку. И закрыла глаза.' },
+            { speaker: '...', text: 'И он понял — больше никто и никогда не спросит его: «Ибраһим, чәй эчәрсеңме?». Никто.' },
+            { speaker: '...', text: 'Через год ушёл дедушка. Тихо. Во сне.' },
+            { speaker: '...', text: 'А потом — Роджерс. Ибрагим забрал его в Казань. Старого. Роджерс спал на его кровати. Смотрел мудро. Как в детстве. Молчал.' },
+            { speaker: '...', text: 'А потом — Роджерс ушёл. Как все коты. В темноту. Не вернулся. Ибрагим искал его. Долго. Но не нашёл.' },
+            { speaker: '...', text: 'Так уходят коты — чтобы хозяин не видел. Чтобы умереть в тишине. Одному.' }
+        ],
+        choices: [
+            { text: 'Пойти с друзьями в поход', next: 'ch5_friends', hope: +10 },
+            { text: 'Остаться дома. Покурить на балконе', next: 'ch5_smoke', lost: +10 }
+        ]
+    },
+
+    ch5_friends: {
+        bg: 'friends.jpg', theme: 'guitar_forest',
+        lines: [
+            { speaker: '...', text: 'А потом Ильназ позвал его в поход. С ночёвкой. На озеро. С палатками. С гитарой.' },
+            { speaker: '...', text: 'Ибрагим сначала отказался. Сказал — не хочу. Сказал — устал. Сказал — не моё.' },
+            { speaker: 'Ильназ', text: 'Ибрагим, пошли. Ну что ты как старик. Мы молодые. Мы живые.' },
+            { speaker: '...', text: 'Он пошёл. И это был один из лучших дней в его жизни.' },
+            { speaker: '...', text: 'Они ехали в электричке. Потом шли пешком через лес. С рюкзаками. С палатками. С гитарой. Ильназ, Искандер, ещё пара знакомых. Все — молодые. Все — весёлые.' },
+            { speaker: '...', text: 'У озера разбили палатку. Разожгли костёр. Ели печёную картошку. Пили сидр из бутылок. Смеялись над глупыми шутками.' },
+            { speaker: '...', text: 'Ильназ играл на гитаре. Кто-то пел. Кто-то молчал и смотрел в огонь.' },
+            { speaker: '...', text: 'А потом Ибрагим просто лёг на траву. Прямо у дороги. Раскинул руки. И смотрел в небо. Долго. Очень долго.', bg: 'ibrahim 1.webp', theme: 'guitar_happy' },
+            { speaker: '...', text: 'Звёзды зажглись одна за другой. Ильназ играл на гитаре. Ибрагим слушал. И думал: может, вот оно?' },
+            { speaker: 'Ибрагим', text: 'Может, счастье — это просто быть здесь. С ними. Сейчас.' },
+            { speaker: '...', text: 'Он запомнил этот вечер. На всю жизнь. Как доказательство. Что было хорошо. Что было по-настоящему.' },
+            { speaker: '...', text: 'Даже когда потом стало плохо — этот вечер остался. Как свет в темноте. Как точка опоры.' }
+        ],
+        needs: { hope: +15, pain: -10, mask: -10 },
+        choices: [{ text: 'Вспоминать это. Всегда.', next: 'ch3', faith: +10 }]
+    },
+
+    ch5_smoke: {
+        bg: 'smoke.jpg', theme: 'guitar_sad',
+        lines: [
+            { speaker: '...', text: 'Он вышел на балкон. Ночью. Курить. В пустой квартире. С видом на такие же пустые трёхэтажки.' },
+            { speaker: '...', text: 'Он закурил. Смотрел на огонёк сигареты. На дым, который уходил в темноту. На небо, в котором не было звёзд — только оранжевый свет фонарей.' },
+            { speaker: 'Ибрагим', text: 'Почему всё так? Почему одни уходят, а другие остаются? Почему я всё ещё здесь? Зачем?' },
+            { speaker: '...', text: 'Ответа не было. Только тишина. Но в этой тишине было что-то. Что-то, что он не мог назвать словами.' },
+            { speaker: '...', text: 'Он докурил. Потушил окурок. И пошёл спать. На матрас. На полу. В пустой квартире.' }
+        ],
+        needs: { pain: +5, lost: +5 },
+        choices: [{ text: 'Заснуть', next: 'ch3' }]
     },
 
     ch3: {
         bg: 'ilnaz.jpg', theme: 'guitar_friends',
-        title: 'ГЛАВА IV', subtitle: '～ Ильназ ～',
+        title: 'ГЛАВА V', subtitle: '～ Ильназ ～',
         lines: [
             { speaker: '...', text: 'Он вернулся в Казань. После Ижевска. После Юли. После всего. Шестой класс. Опять новая школа. Опять новые лица. Опять — чужой.' },
             { speaker: '...', text: 'Ибрагим был один. Снова один. Снова новый город. Снова все чужие.' },
@@ -767,7 +769,7 @@ const script = {
 
     ch4: {
         bg: 'dasha-time.jpg', theme: 'guitar_warm',
-        title: 'ГЛАВА V', subtitle: '～ Даша ～',
+        title: 'ГЛАВА VI', subtitle: '～ Даша ～',
         lines: [
             { speaker: '...', text: '7 класс. Даша. Одноклассница. Неприступная. Он смотрел на неё. Каждый день. Все уроки. Он не мог понять — почему именно она.' },
             { speaker: '...', text: 'Она была красивой. Но красивых было много. Она была умной. Но умных хватало. Она была — другая. Отстранённая. Как будто не здесь. Как будто в своём мире.' },
@@ -825,7 +827,7 @@ const script = {
 
     ch_julia_end: {
         bg: 'julia-time.jpg', theme: 'guitar_warm',
-        title: 'ГЛАВА VI', subtitle: '～ Юля. Конец ～',
+        title: 'ГЛАВА VII', subtitle: '～ Юля. Конец ～',
         lines: [
             { speaker: '...', text: 'После Даши — пустота. Он не знал, куда себя деть. Дни шли одинаково. Утро. Работа. Вечер. Ночь. И снова утро.' },
             { speaker: '...', text: 'И тогда он вспомнил о ней. О Юле. О той, с которой можно было молчать. О той, которую он так и не нашёл тогда.' },
@@ -863,8 +865,8 @@ const script = {
         ],
         choices: [
             { text: '⟳ А если бы я остался?', next: 'pribit_julia_final', pribit: true },
-            { text: '«Я не виноват. Но легче не будет.»', next: 'ch5', pain: +20 },
-            { text: '«Значит, я и её не удержал. Значит, я — проклятый.»', next: 'ch5', pain: +25, hope: -20, mask: +15 }
+            { text: '«Я не виноват. Но легче не будет.»', next: 'ch7', pain: +20 },
+            { text: '«Значит, я и её не удержал. Значит, я — проклятый.»', next: 'ch7', pain: +25, hope: -20, mask: +15 }
         ]
     },
 
@@ -879,81 +881,7 @@ const script = {
             { speaker: 'Ибрагим', text: 'Значит, я не виноват. Значит, я сделал всё, что мог. Значит, пора — отпустить.' }
         ],
         needs: { pain: -10, faith: +10 },
-        choices: [{ text: 'Вернуться', next: 'ch5' }]
-    },
-
-    ch5: {
-        bg: 'svetly.jpg', theme: 'guitar_lonely',
-        title: 'ГЛАВА VII', subtitle: '～ Светлый ～',
-        lines: [
-            { speaker: '...', text: 'Он вернулся в Светлый. В свою пустую квартиру. С голыми стенами. С матрасом на полу. С проёмом вместо двери в туалет.' },
-            { speaker: '...', text: 'Мама была в Москве. Зарабатывала. Он был один. И ему это нравилось. Потому что никого не надо было видеть. Никого — не надо было бояться потерять.' },
-            { speaker: '...', text: 'Квартира была отражением его души. Голая. Холодная. Без ремонта. Он не хотел её обживать. Не хотел вкладывать силы. Не хотел превращать в «дом».' },
-            { speaker: '...', text: 'Потому что дом — это когда знаешь, что останешься. А он не знал. И не хотел знать.' },
-            { speaker: '...', text: 'Он снова работал курьером. С Ильназом. Потом — с Искандером. Весёлые были времена. Дерзкие. Молодые. Они смеялись над всем. Над собой. Над миром.' },
-            { speaker: '...', text: 'А потом — шиномонтаж. Гараж на окраине. Запах резины и масла. Гора покрышек во дворе. Ржавый подъёмник. И музыка из старого радио.', bg: 'shinka.jpg', theme: 'guitar_friends' },
-            { speaker: '...', text: 'Ильназ — убийца колёс. Он умудрялся сломать то, что сломать невозможно. Но делал это с таким энтузиазмом, что никто не злился. Ибрагим — вечно болел. Простужался каждый месяц. Но работал.' },
-            { speaker: '...', text: 'Они меняли колёса, чинили проколы, курили в перерывах. Иногда заходили знакомые. Иногда просто сидели молча.' },
-            { speaker: 'Ибрагим', text: 'Может, это и есть жизнь? Просто — работать. Смеяться. Быть с друзьями.' },
-            { speaker: '...', text: 'Он не знал ответа. Но в эти моменты — в гараже, с покрышками, с Ильназом — ему было хорошо. По-настоящему.' },
-            { speaker: '...', text: 'А потом была стройка. В Ижевске. У Тимура. Зимой.', bg: 'svetly.jpg', theme: 'guitar_lonely' },
-            { speaker: '...', text: 'Минус тридцать. Утро. Тёмное небо. Иней на ресницах. Пар изо рта. Работали в ватниках, в шапках-ушанках, в валенках. Но всё равно мёрзли.' },
-            { speaker: '...', text: 'Тимур — прораб. Мужик лет сорока. Молчаливый. Смеялся редко. Но если смеялся — громко. И все смеялись вместе с ним.' },
-            { speaker: 'Тимур', text: 'Ибрагим, не спи. Раствор стынет.' },
-            { speaker: 'Ибрагим', text: 'Иду, иду.' },
-            { speaker: '...', text: 'Он мешал цемент. Кирпичи были тяжелее, чем казалось. Пальцы не сгибались. Перчатки не спасали. Но он работал. Молча. Как робот.' },
-            { speaker: '...', text: 'В обед — перерыв. Все сидели в вагончике. Пили чай из термоса. Курили. Молчали. Каждый думал о своём.' },
-            { speaker: 'Ибрагим', text: 'Я устал. Но не так, как от Озона. По-другому. Как будто тело болит — а душа нет. И это — лучше.' },
-            { speaker: '...', text: 'Он проработал там месяц. Тридцать дней. Минус тридцать каждый день. А потом — ушёл. Как всегда. Никого не предупредив. Просто не пришёл однажды.' },
-            { speaker: '...', text: 'Это была его суперсила — уходить. И его проклятие.' },
-            { speaker: '...', text: 'Он вернулся в Ижевск. К бабушке и дедушке. Они старели. Он это видел. И боялся.' },
-            { speaker: '...', text: 'А потом ушла бабушка. Рак. Она умирала долго. Он приезжал каждый месяц. Сидел у её кровати. Держал за руку.' },
-            { speaker: '...', text: 'Она уже почти не говорила. Только смотрела. И иногда — еле слышно — произносила: «Ибраһим, чәй эчәрсеңме?».' },
-            { speaker: '...', text: 'И он кивал. И наливал ей чай. И держал её за руку. Долго. Очень долго.' },
-            { speaker: '...', text: 'А в последний раз — она не сказала ничего. Просто сжала его руку. И закрыла глаза.' },
-            { speaker: '...', text: 'И он понял — больше никто и никогда не спросит его: «Ибраһим, чәй эчәрсеңме?». Никто.' },
-            { speaker: '...', text: 'Через год ушёл дедушка. Тихо. Во сне.' },
-            { speaker: '...', text: 'А потом — Роджерс. Ибрагим забрал его в Казань. Старого. Роджерс спал на его кровати. Смотрел мудро. Как в детстве. Молчал.' },
-            { speaker: '...', text: 'А потом — Роджерс ушёл. Как все коты. В темноту. Не вернулся. Ибрагим искал его. Долго. Но не нашёл.' },
-            { speaker: '...', text: 'Так уходят коты — чтобы хозяин не видел. Чтобы умереть в тишине. Одному.' }
-        ],
-        choices: [
-            { text: 'Пойти с друзьями в поход', next: 'ch5_friends', hope: +10 },
-            { text: 'Остаться дома. Покурить на балконе', next: 'ch5_smoke', lost: +10 }
-        ]
-    },
-
-    ch5_friends: {
-        bg: 'friends.jpg', theme: 'guitar_forest',
-        lines: [
-            { speaker: '...', text: 'А потом Ильназ позвал его в поход. С ночёвкой. На озеро. С палатками. С гитарой.' },
-            { speaker: '...', text: 'Ибрагим сначала отказался. Сказал — не хочу. Сказал — устал. Сказал — не моё.' },
-            { speaker: 'Ильназ', text: 'Ибрагим, пошли. Ну что ты как старик. Мы молодые. Мы живые.' },
-            { speaker: '...', text: 'Он пошёл. И это был один из лучших дней в его жизни.' },
-            { speaker: '...', text: 'Они ехали в электричке. Потом шли пешком через лес. С рюкзаками. С палатками. С гитарой. Ильназ, Искандер, ещё пара знакомых. Все — молодые. Все — весёлые.' },
-            { speaker: '...', text: 'У озера разбили палатку. Разожгли костёр. Ели печёную картошку. Пили сидр из бутылок. Смеялись над глупыми шутками.' },
-            { speaker: '...', text: 'Ильназ играл на гитаре. Кто-то пел. Кто-то молчал и смотрел в огонь.' },
-            { speaker: '...', text: 'А потом Ибрагим просто лёг на траву. Прямо у дороги. Раскинул руки. И смотрел в небо. Долго. Очень долго.', bg: 'ibrahim 1.webp', theme: 'guitar_happy' },
-            { speaker: '...', text: 'Звёзды зажглись одна за другой. Ильназ играл на гитаре. Ибрагим слушал. И думал: может, вот оно?' },
-            { speaker: 'Ибрагим', text: 'Может, счастье — это просто быть здесь. С ними. Сейчас.' },
-            { speaker: '...', text: 'Он запомнил этот вечер. На всю жизнь. Как доказательство. Что было хорошо. Что было по-настоящему.' },
-            { speaker: '...', text: 'Даже когда потом стало плохо — этот вечер остался. Как свет в темноте. Как точка опоры.' }
-        ],
-        needs: { hope: +15, pain: -10, mask: -10 },
-        choices: [{ text: 'Вспоминать это. Всегда.', next: 'ch7', faith: +10 }]
-    },
-
-    ch5_smoke: {
-        bg: 'smoke.jpg', theme: 'guitar_sad',
-        lines: [
-            { speaker: '...', text: 'Он вышел на балкон. Ночью. Курить. В пустой квартире. С видом на такие же пустые трёхэтажки.' },
-            { speaker: '...', text: 'Он закурил. Смотрел на огонёк сигареты. На дым, который уходил в темноту. На небо, в котором не было звёзд — только оранжевый свет фонарей.' },
-            { speaker: 'Ибрагим', text: 'Почему всё так? Почему одни уходят, а другие остаются? Почему я всё ещё здесь? Зачем?' },
-            { speaker: '...', text: 'Ответа не было. Только тишина. Но в этой тишине было что-то. Что-то, что он не мог назвать словами.' },
-            { speaker: '...', text: 'Он докурил. Потушил окурок. И пошёл спать. На матрас. На полу. В пустой квартире.' }
-        ],
-        needs: { pain: +5, lost: +5 },
-        choices: [{ text: 'Заснуть', next: 'ch7' }]
+        choices: [{ text: 'Вернуться', next: 'ch7' }]
     },
 
     ch7: {
@@ -1002,9 +930,6 @@ const script = {
     finale: {
         bg: 'ibrahim-walk.jpg', theme: 'guitar_dawn',
         ending: true,
-        endTitle: 'КОНЕЦ',
-        endText: 'Ибрагим не стал богатым. Не стал знаменитым. Не нашёл всех ответов. Но он нашёл главное — себя. И тишину. В которой наконец стало спокойно.',
-        endQuote: '«Никто не знает, зачем мы живём. Но есть вещи, которые знаешь — не головой, а сердцем. Что надо быть рядом. Что надо говорить. Пока есть время. Что надо идти — даже если не знаешь куда. И что однажды — ты оглянешься. И увидишь: всё было не зря. Даже боль. Даже потери. Даже тишина. Всё — было не зря.»',
         lines: [
             { speaker: '...', text: 'Он идёт по дороге. Один. Но не одинок. Дорога бесконечна. Но он не боится. Потому что знает — он живой. А значит — всё ещё возможно.' }
         ],
@@ -1195,58 +1120,72 @@ function setBackground(bgName) {
     img.src = url;
 }
 
-// ============ ФИНАЛ + ТИТРЫ ============
+// ============ ФИНАЛ → ТИТРЫ ============
 function showEnding(scene) {
-    document.getElementById('end-title').textContent = scene.endTitle || 'КОНЕЦ';
-    document.getElementById('end-text').textContent = scene.endText || '';
-    document.getElementById('end-quote').textContent = scene.endQuote || '';
+    // Плавно затемняем всю игру
+    document.getElementById('game').style.transition = 'opacity 3s ease';
     document.getElementById('game').style.opacity = '0';
 
+    // Через 3 секунды — старт титров
     setTimeout(() => {
-        document.getElementById('end-screen').classList.add('show');
-
-        setTimeout(() => {
-            startCredits();
-        }, 10000);
-    }, 1500);
+        startCredits();
+    }, 3000);
 }
 
 function startCredits() {
     stopTheme();
-    document.getElementById('end-screen').classList.remove('show');
 
     const credits = document.getElementById('credits-screen');
     credits.classList.add('show');
 
-    setTimeout(() => {
-        credits.classList.remove('show');
+    // Запускаем бесконечную смену фото на фоне
+    startCreditsPhotoLoop();
 
-        const btnScreen = document.getElementById('credits-btn-screen');
-        btnScreen.classList.add('show');
-
-        document.getElementById('credits-continue-btn').onclick = () => {
-            btnScreen.classList.remove('show');
-            startCreditsGallery();
-        };
-    }, 8000);
+    // Запускаем музыку — тихо, потом плавно нарастает
+    playCreditsMusic();
 }
 
-function startCreditsGallery() {
-    const gallery = document.getElementById('credits-gallery');
-    const photos = gallery.querySelectorAll('.credit-photo');
-    gallery.classList.add('show');
+function startCreditsPhotoLoop() {
+    const bgContainer = document.getElementById('credits-bg');
+    const photoList = [
+        'ibrahim-walk.jpg',
+        'childhood.jpg',
+        'julia-time.jpg',
+        'friends.jpg',
+        'ibrahim-field.webp',
+        'julia-izhevsk.jpg',
+        'ilnaz.jpg',
+        'dasha-time.jpg',
+        'julia-dark.webp',
+        'julia-end.jpg',
+        'stroyka.jpg',
+        'svetly.jpg',
+        'smoke.jpg',
+        'shinka.jpg',
+        'school.webp',
+        'ibrahim 1.webp',
+        'ilnaz.png'
+    ];
 
-    playCreditsMusic();
+    // Создаём все img один раз
+    const imgs = photoList.map(src => {
+        const img = document.createElement('img');
+        img.className = 'credits-bg-photo';
+        img.src = encodeURI(src);
+        bgContainer.appendChild(img);
+        return img;
+    });
 
     let idx = 0;
-    function flashNext() {
-        if (idx >= photos.length) return;
-        photos.forEach(p => p.classList.remove('flash'));
-        photos[idx].classList.add('flash');
-        idx++;
-        setTimeout(flashNext, 1200);
+    function showNext() {
+        imgs.forEach(i => i.classList.remove('active'));
+        imgs[idx].classList.add('active');
+        idx = (idx + 1) % imgs.length;
     }
-    flashNext();
+
+    showNext();
+    // Меняем фото каждые 0.9 секунды — быстро, бесконечно
+    setInterval(showNext, 900);
 }
 
 let creditsAudio = null;
@@ -1254,12 +1193,24 @@ function playCreditsMusic() {
     if (creditsAudio) return;
     try {
         creditsAudio = new Audio('Chernikovskaya_Hata_-_Spektakl_Okonchen_69749630.mp3');
-        creditsAudio.volume = 0.5;
+        creditsAudio.volume = 0.0;  // начинаем с нуля
         creditsAudio.loop = false;
+
         const p = creditsAudio.play();
         if (p !== undefined) {
-            p.then(() => console.log('Музыка титров играет'))
-             .catch(err => console.warn('Музыка не запустилась:', err));
+            p.then(() => {
+                // Плавно нарастаем до 0.35 (умеренно)
+                let vol = 0.0;
+                const fadeIn = setInterval(() => {
+                    if (vol < 0.35) {
+                        vol += 0.01;
+                        creditsAudio.volume = vol;
+                    } else {
+                        creditsAudio.volume = 0.35;
+                        clearInterval(fadeIn);
+                    }
+                }, 200);
+            }).catch(err => console.warn('Музыка не запустилась:', err));
         }
     } catch(e) {
         console.error('Ошибка аудио:', e);
