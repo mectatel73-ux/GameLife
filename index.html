@@ -2,11 +2,12 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Ибрагим — Бесконечная дорога</title>
 <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; overflow: hidden; font-family: 'Georgia', 'Times New Roman', serif; background: #000; user-select: none; }
-    #game { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; font-family: 'Georgia', 'Times New Roman', serif; background: #000; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
+    #game { position: relative; width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; }
 
     #preloader {
         position: fixed; inset: 0;
@@ -63,24 +64,11 @@
     #choices { position: absolute; bottom: 320px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 14px; z-index: 15; width: 760px; max-width: 92vw; }
     .choice-btn { padding: 20px 42px; background: linear-gradient(90deg, rgba(30,15,45,0.95) 0%, rgba(50,25,75,0.95) 50%, rgba(30,15,45,0.95) 100%); border: 2px solid rgba(255,200,120,0.4); color: #f2eae2; font-size: 17px; font-family: 'Georgia', serif; font-style: italic; cursor: pointer; transition: all 0.4s; text-align: center; border-radius: 10px; box-shadow: 0 8px 35px rgba(0,0,0,0.7); position: relative; overflow: hidden; }
     .choice-btn::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #ffd966; transform: scaleY(0); transition: transform 0.4s; }
-    .choice-btn:hover { background: linear-gradient(90deg, rgba(255,200,120,0.1) 0%, rgba(255,200,120,0.28) 50%, rgba(255,200,120,0.1) 100%); border-color: #ffd966; transform: translateY(-2px) translateX(8px); box-shadow: 0 14px 45px rgba(255,200,120,0.5); }
-    .choice-btn:hover::before { transform: scaleY(1); }
+    .choice-btn:active { background: linear-gradient(90deg, rgba(255,200,120,0.15) 0%, rgba(255,200,120,0.3) 50%, rgba(255,200,120,0.15) 100%); border-color: #ffd966; }
 
     #chapter-title { position: absolute; top: 42%; left: 50%; transform: translate(-50%, -50%) scale(0.7); color: #ffd966; font-family: 'Georgia', serif; text-shadow: 0 0 60px rgba(255,200,120,0.9), 0 15px 50px rgba(0,0,0,1); opacity: 0; pointer-events: none; transition: all 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); letter-spacing: 14px; z-index: 100; text-align: center; font-size: 72px; }
     #chapter-title.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     #chapter-title small { display: block; font-size: 18px; letter-spacing: 8px; color: #ffb86c; margin-top: 22px; opacity: 0.85; font-style: italic; font-weight: normal; }
-
-    #hud { position: absolute; top: 20px; left: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 20; padding: 16px 20px; background: rgba(5,2,12,0.7); backdrop-filter: blur(14px); border: 1px solid rgba(255,200,120,0.25); border-radius: 14px; min-width: 270px; }
-    #hud-title { font-size: 10px; color: #ffd966; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 10px; opacity: 0.8; }
-    .hud-row { display: flex; align-items: center; gap: 12px; font-size: 11px; color: #d0c0e0; }
-    .hud-label { width: 105px; font-size: 11px; letter-spacing: 0.4px; opacity: 0.85; font-style: italic; }
-    .hud-bar { flex: 1; height: 6px; background: rgba(0,0,0,0.6); border-radius: 3px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); }
-    .hud-fill { height: 100%; border-radius: 3px; transition: width 1.2s ease; }
-    .fill-faith { background: linear-gradient(90deg, #b197fc, #d0bfff); }
-    .fill-pain { background: linear-gradient(90deg, #ff6b6b, #ff8787); }
-    .fill-mask { background: linear-gradient(90deg, #adb5bd, #ced4da); }
-    .fill-lost { background: linear-gradient(90deg, #748ffc, #91a7ff); }
-    .fill-hope { background: linear-gradient(90deg, #ffd43b, #ffec99); }
 
     .dust { position: absolute; width: 3px; height: 3px; background: rgba(255,220,150,0.5); border-radius: 50%; pointer-events: none; animation: float 12s linear infinite; z-index: 4; }
     @keyframes float { 0% { transform: translate(0, 0) scale(1); opacity: 0; } 10% { opacity: 0.7; } 90% { opacity: 0.7; } 100% { transform: translate(80px, -100vh) scale(0.5); opacity: 0; } }
@@ -90,7 +78,7 @@
     #start-title { font-size: 92px; color: #ffd966; font-family: 'Georgia', serif; text-shadow: 0 0 80px rgba(255,200,120,0.8); letter-spacing: 18px; margin-bottom: 26px; }
     #start-subtitle { font-size: 22px; color: #d0a060; font-style: italic; margin-bottom: 85px; letter-spacing: 7px; }
     #start-btn { padding: 24px 90px; font-size: 20px; background: linear-gradient(180deg, #ffd966 0%, #d4a040 100%); color: #1a0a15; border: none; border-radius: 12px; cursor: pointer; font-family: 'Georgia', serif; font-weight: bold; letter-spacing: 5px; transition: all 0.4s; box-shadow: 0 0 60px rgba(255,200,120,0.6); }
-    #start-btn:hover { transform: scale(1.06); box-shadow: 0 0 100px rgba(255,200,120,1); }
+    #start-btn:active { transform: scale(1.04); }
     #start-hint { margin-top: 60px; color: #6a5060; font-size: 13px; font-style: italic; letter-spacing: 2px; max-width: 600px; line-height: 1.9; }
 
     /* ===== ТИТРЫ ===== */
@@ -107,7 +95,6 @@
     }
     #credits-screen.show { display: flex; }
 
-    /* Фото-фон, бесконечно сменяющиеся */
     #credits-bg {
         position: absolute;
         inset: 0;
@@ -124,14 +111,12 @@
         filter: brightness(0.35) contrast(1.1) saturate(1.1);
         transition: opacity 0.15s ease;
     }
-    .credits-bg-photo.active {
-        opacity: 1;
-    }
+    .credits-bg-photo.active { opacity: 1; }
 
     #credits-content {
         position: relative;
         z-index: 2;
-        padding: 40px;
+        padding: 40px 20px;
         text-shadow: 0 0 60px rgba(0,0,0,0.95), 0 4px 30px rgba(0,0,0,1);
     }
     .credit-line {
@@ -151,15 +136,99 @@
         margin-bottom: 60px;
     }
 
+    /* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
     @media (max-width: 900px) {
-        #dialogue-box { min-height: 240px; padding: 20px 30px 30px; }
-        #dialogue-text { font-size: 16px; }
-        #choices { width: 92%; bottom: 260px; }
-        #chapter-title { font-size: 42px; letter-spacing: 6px; }
-        #start-title { font-size: 52px; letter-spacing: 8px; }
-        #hud { min-width: 200px; padding: 12px 14px; }
-        .hud-label { width: 80px; font-size: 10px; }
-        .credit-name { font-size: 26px; letter-spacing: 5px; }
+        #dialogue-box {
+            min-height: 220px;
+            padding: 16px 20px 24px;
+            padding-bottom: calc(24px + env(safe-area-inset-bottom));
+        }
+        #speaker {
+            font-size: 13px;
+            padding: 6px 20px;
+            letter-spacing: 1.5px;
+        }
+        #dialogue-text {
+            font-size: 16px;
+            line-height: 1.7;
+            min-height: 120px;
+            padding: 12px 2px 0;
+        }
+        #continue-hint {
+            font-size: 11px;
+            margin-top: 8px;
+        }
+        #choices {
+            bottom: 240px;
+            width: 94vw;
+            gap: 10px;
+        }
+        .choice-btn {
+            padding: 16px 20px;
+            font-size: 15px;
+            border-radius: 12px;
+        }
+        #chapter-title {
+            font-size: 36px;
+            letter-spacing: 6px;
+            padding: 0 20px;
+        }
+        #chapter-title small {
+            font-size: 14px;
+            letter-spacing: 4px;
+            margin-top: 14px;
+        }
+        #start-title {
+            font-size: 52px;
+            letter-spacing: 8px;
+        }
+        #start-subtitle {
+            font-size: 16px;
+            letter-spacing: 4px;
+            margin-bottom: 50px;
+        }
+        #start-btn {
+            padding: 20px 60px;
+            font-size: 17px;
+            letter-spacing: 4px;
+        }
+        #start-hint {
+            font-size: 12px;
+            margin-top: 40px;
+        }
+        .preloader-title { font-size: 44px; letter-spacing: 8px; }
+        .preloader-sub { font-size: 14px; letter-spacing: 4px; margin-bottom: 40px; }
+        .preloader-bar { width: 260px; }
+        .credit-name { font-size: 26px; letter-spacing: 4px; margin-bottom: 30px; }
+        .credit-line { font-size: 11px; letter-spacing: 3px; }
+    }
+
+    /* Маленькие телефоны в горизонтальной ориентации */
+    @media (max-height: 500px) and (orientation: landscape) {
+        #dialogue-box {
+            min-height: 140px;
+            padding: 10px 30px 14px;
+        }
+        #dialogue-text {
+            font-size: 14px;
+            min-height: 70px;
+            line-height: 1.5;
+        }
+        #speaker { font-size: 12px; padding: 5px 16px; }
+        #continue-hint { font-size: 10px; margin-top: 4px; }
+        #choices {
+            bottom: 150px;
+            gap: 8px;
+        }
+        .choice-btn { padding: 10px 16px; font-size: 13px; }
+        #chapter-title { font-size: 28px; letter-spacing: 4px; }
+        #chapter-title small { font-size: 11px; letter-spacing: 2px; margin-top: 8px; }
+        #start-title { font-size: 36px; letter-spacing: 6px; }
+        #start-subtitle { font-size: 13px; letter-spacing: 3px; margin-bottom: 30px; }
+        #start-btn { padding: 14px 44px; font-size: 14px; }
+        #start-hint { font-size: 10px; margin-top: 20px; line-height: 1.6; }
+        .credit-name { font-size: 20px; letter-spacing: 3px; margin-bottom: 16px; }
+        .credit-line { font-size: 10px; letter-spacing: 2px; }
     }
 </style>
 </head>
@@ -195,22 +264,13 @@
     <div id="chapter-dark"></div>
     <div id="silence-dark"></div>
 
-    <div id="hud">
-        <div id="hud-title">ВНУТРЕННИЙ МИР</div>
-        <div class="hud-row"><span class="hud-label">🕯️ Тихость</span><div class="hud-bar"><div class="hud-fill fill-faith" id="h-faith" style="width:70%"></div></div></div>
-        <div class="hud-row"><span class="hud-label">💔 Боль</span><div class="hud-bar"><div class="hud-fill fill-pain" id="h-pain" style="width:20%"></div></div></div>
-        <div class="hud-row"><span class="hud-label">🎭 Маска</span><div class="hud-bar"><div class="hud-fill fill-mask" id="h-mask" style="width:40%"></div></div></div>
-        <div class="hud-row"><span class="hud-label">🌫️ Потерянность</span><div class="hud-bar"><div class="hud-fill fill-lost" id="h-lost" style="width:30%"></div></div></div>
-        <div class="hud-row"><span class="hud-label">🌱 Надежда</span><div class="hud-bar"><div class="hud-fill fill-hope" id="h-hope" style="width:60%"></div></div></div>
-    </div>
-
     <div id="chapter-title"></div>
     <div id="choices"></div>
 
     <div id="dialogue-box">
         <div id="speaker">...</div>
         <div id="dialogue-text">...</div>
-        <div id="continue-hint">▼ клик · пробел · Enter</div>
+        <div id="continue-hint">▼ тап · свайп · Enter</div>
     </div>
 </div>
 
@@ -1092,15 +1152,6 @@ function applyNeeds(needs) {
             state.inner[key] = Math.max(0, Math.min(100, state.inner[key] + needs[key]));
         }
     }
-    updateHUD();
-}
-
-function updateHUD() {
-    const map = { faith: 'h-faith', pain: 'h-pain', mask: 'h-mask', lost: 'h-lost', hope: 'h-hope' };
-    for (const key in map) {
-        const el = document.getElementById(map[key]);
-        if (el) el.style.width = state.inner[key] + '%';
-    }
 }
 
 function setBackground(bgName) {
@@ -1122,11 +1173,9 @@ function setBackground(bgName) {
 
 // ============ ФИНАЛ → ТИТРЫ ============
 function showEnding(scene) {
-    // Плавно затемняем всю игру
     document.getElementById('game').style.transition = 'opacity 3s ease';
     document.getElementById('game').style.opacity = '0';
 
-    // Через 3 секунды — старт титров
     setTimeout(() => {
         startCredits();
     }, 3000);
@@ -1138,10 +1187,7 @@ function startCredits() {
     const credits = document.getElementById('credits-screen');
     credits.classList.add('show');
 
-    // Запускаем бесконечную смену фото на фоне
     startCreditsPhotoLoop();
-
-    // Запускаем музыку — тихо, потом плавно нарастает
     playCreditsMusic();
 }
 
@@ -1167,7 +1213,6 @@ function startCreditsPhotoLoop() {
         'ilnaz.png'
     ];
 
-    // Создаём все img один раз
     const imgs = photoList.map(src => {
         const img = document.createElement('img');
         img.className = 'credits-bg-photo';
@@ -1184,7 +1229,6 @@ function startCreditsPhotoLoop() {
     }
 
     showNext();
-    // Меняем фото каждые 0.9 секунды — быстро, бесконечно
     setInterval(showNext, 900);
 }
 
@@ -1193,13 +1237,12 @@ function playCreditsMusic() {
     if (creditsAudio) return;
     try {
         creditsAudio = new Audio('Chernikovskaya_Hata_-_Spektakl_Okonchen_69749630.mp3');
-        creditsAudio.volume = 0.0;  // начинаем с нуля
+        creditsAudio.volume = 0.0;
         creditsAudio.loop = false;
 
         const p = creditsAudio.play();
         if (p !== undefined) {
             p.then(() => {
-                // Плавно нарастаем до 0.35 (умеренно)
                 let vol = 0.0;
                 const fadeIn = setInterval(() => {
                     if (vol < 0.35) {
@@ -1218,16 +1261,7 @@ function playCreditsMusic() {
 }
 
 // ============ ОБРАБОТЧИКИ ============
-document.addEventListener('keydown', (e) => {
-    if (e.key === ' ' || e.key === 'Enter') {
-        e.preventDefault();
-        const box = document.getElementById('dialogue-box');
-        if (box.style.pointerEvents === 'none') return;
-        if (box.style.opacity === '0') return;
-        nextLine();
-    }
-});
-
+// Клик для мыши
 document.addEventListener('click', (e) => {
     if (e.target.closest('#choices')) return;
     if (e.target.closest('#dialogue-box')) {
@@ -1238,8 +1272,30 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// Тач для телефона — быстрый тап без задержки
+document.addEventListener('touchend', (e) => {
+    if (e.target.closest('#choices')) return;
+    if (e.target.closest('#dialogue-box')) {
+        e.preventDefault();
+        const box = document.getElementById('dialogue-box');
+        if (box.style.pointerEvents === 'none') return;
+        if (box.style.opacity === '0') return;
+        nextLine();
+    }
+}, { passive: false });
+
+// Клавиатура
+document.addEventListener('keydown', (e) => {
+    if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        const box = document.getElementById('dialogue-box');
+        if (box.style.pointerEvents === 'none') return;
+        if (box.style.opacity === '0') return;
+        nextLine();
+    }
+});
+
 window.addEventListener('load', async () => {
-    updateHUD();
     await preloadAllImages();
     setTimeout(() => {
         const preloader = document.getElementById('preloader');
