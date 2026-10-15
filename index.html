@@ -56,14 +56,11 @@
         color: #ff8a8a; line-height: 1.7; display: none;
     }
     .preloader-failed.show { display: block; }
-    .preloader-failed-title {
-        font-weight: bold; margin-bottom: 8px; color: #ff6b6b;
-    }
+    .preloader-failed-title { font-weight: bold; margin-bottom: 8px; color: #ff6b6b; }
 
-    /* ФОН — теперь фото целиком, качественно */
     .bg-layer {
         position: absolute; inset: 0;
-        background-size: contain;
+        background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
         background-color: #0a0510;
@@ -76,21 +73,30 @@
     }
     @keyframes kenburns {
         0% { transform: scale(1); }
-        100% { transform: scale(1.03); }
+        100% { transform: scale(1.04); }
     }
     .bg-blur {
-        position: absolute; inset: -15%;
+        position: absolute; inset: -20%;
         background-size: cover;
         background-position: center;
-        filter: blur(70px) brightness(0.18) saturate(1.3);
+        filter: blur(80px) brightness(0.2) saturate(1.2);
         opacity: 0; transition: opacity 2s ease;
         z-index: 0;
     }
     .bg-blur.active { opacity: 1; }
 
+    #chapter-dark {
+        position: absolute; inset: 0;
+        background: #000;
+        opacity: 0; pointer-events: none;
+        transition: opacity 1.5s ease;
+        z-index: 90;
+    }
+    #chapter-dark.show { opacity: 0.9; }
+
     #vignette {
         position: absolute; inset: 0; pointer-events: none;
-        background: radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,0.9) 100%);
+        background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.85) 100%);
         z-index: 3;
     }
     #gradient-bottom {
@@ -101,8 +107,8 @@
 
     #dialogue-box {
         position: absolute; bottom: 0; left: 0; right: 0;
-        min-height: 280px; z-index: 10;
-        padding: 30px 90px 40px;
+        min-height: 300px; z-index: 10;
+        padding: 30px 100px 45px;
         display: flex; flex-direction: column; cursor: pointer;
     }
     #speaker {
@@ -114,10 +120,10 @@
         box-shadow: 0 -6px 30px rgba(255,200,100,0.5);
     }
     #dialogue-text {
-        flex: 1; font-size: 19px; line-height: 1.9;
+        flex: 1; font-size: 19px; line-height: 1.95;
         color: #f2eae2; text-shadow: 0 2px 14px rgba(0,0,0,0.95);
         overflow-y: auto; padding: 16px 4px 0;
-        min-height: 140px; font-style: italic;
+        min-height: 160px; font-style: italic;
     }
     #dialogue-text::-webkit-scrollbar { width: 4px; }
     #dialogue-text::-webkit-scrollbar-thumb { background: rgba(255,200,120,0.3); border-radius: 2px; }
@@ -126,18 +132,18 @@
         text-align: right; font-size: 12px;
         color: rgba(255,200,120,0.6);
         animation: blink 1.8s infinite;
-        margin-top: 10px; letter-spacing: 1px;
+        margin-top: 12px; letter-spacing: 1px;
     }
     @keyframes blink { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.9; } }
 
     #choices {
-        position: absolute; bottom: 300px; left: 50%;
+        position: absolute; bottom: 320px; left: 50%;
         transform: translateX(-50%);
         display: flex; flex-direction: column; gap: 14px;
-        z-index: 15; width: 720px; max-width: 92vw;
+        z-index: 15; width: 760px; max-width: 92vw;
     }
     .choice-btn {
-        padding: 20px 40px;
+        padding: 20px 42px;
         background: linear-gradient(90deg, rgba(30,15,45,0.95) 0%, rgba(50,25,75,0.95) 50%, rgba(30,15,45,0.95) 100%);
         border: 2px solid rgba(255,200,120,0.4);
         color: #f2eae2; font-size: 17px;
@@ -220,14 +226,6 @@
     .fill-mask { background: linear-gradient(90deg, #adb5bd, #ced4da); }
     .fill-lost { background: linear-gradient(90deg, #748ffc, #91a7ff); }
     .fill-hope { background: linear-gradient(90deg, #ffd43b, #ffec99); }
-
-    #pribit-overlay {
-        position: absolute; inset: 0;
-        background: radial-gradient(ellipse at center, rgba(180,150,255,0.4) 0%, rgba(80,20,120,0.9) 100%);
-        opacity: 0; pointer-events: none; z-index: 50;
-        transition: opacity 0.8s;
-    }
-    #pribit-overlay.show { opacity: 1; }
 
     .dust {
         position: absolute; width: 3px; height: 3px;
@@ -322,9 +320,9 @@
     #end-restart:hover { background: #ffd966; color: #1a0a15; }
 
     @media (max-width: 900px) {
-        #dialogue-box { min-height: 230px; padding: 20px 30px 30px; }
+        #dialogue-box { min-height: 240px; padding: 20px 30px 30px; }
         #dialogue-text { font-size: 16px; }
-        #choices { width: 92%; bottom: 250px; }
+        #choices { width: 92%; bottom: 260px; }
         #chapter-title { font-size: 42px; letter-spacing: 6px; }
         #start-title { font-size: 52px; letter-spacing: 8px; }
         #hud { min-width: 200px; padding: 12px 14px; }
@@ -350,7 +348,7 @@
     <div id="start-subtitle">～ Бесконечная дорога ～</div>
     <button id="start-btn" onclick="startGame()">НАЧАТЬ</button>
     <div id="start-hint">
-        Это история о парне, который искал Бога.<br>
+        Это история о парне, который верил в Бога.<br>
         О парне, который терял и находил.<br>
         О дороге, у которой нет конца.
     </div>
@@ -361,11 +359,11 @@
     <div class="bg-layer active" id="bg"></div>
     <div id="vignette"></div>
     <div id="gradient-bottom"></div>
-    <div id="pribit-overlay"></div>
+    <div id="chapter-dark"></div>
 
     <div id="hud">
         <div id="hud-title">ВНУТРЕННИЙ МИР</div>
-        <div class="hud-row"><span class="hud-label">🕯️ Вера</span><div class="hud-bar"><div class="hud-fill fill-faith" id="h-faith" style="width:50%"></div></div></div>
+        <div class="hud-row"><span class="hud-label">🕯️ Вера</span><div class="hud-bar"><div class="hud-fill fill-faith" id="h-faith" style="width:70%"></div></div></div>
         <div class="hud-row"><span class="hud-label">💔 Боль</span><div class="hud-bar"><div class="hud-fill fill-pain" id="h-pain" style="width:20%"></div></div></div>
         <div class="hud-row"><span class="hud-label">🎭 Маска</span><div class="hud-bar"><div class="hud-fill fill-mask" id="h-mask" style="width:40%"></div></div></div>
         <div class="hud-row"><span class="hud-label">🌫️ Потерянность</span><div class="hud-bar"><div class="hud-fill fill-lost" id="h-lost" style="width:30%"></div></div></div>
@@ -391,7 +389,7 @@
 
 <script>
 const state = {
-    inner: { faith: 50, pain: 20, mask: 40, lost: 30, hope: 60 },
+    inner: { faith: 70, pain: 20, mask: 40, lost: 30, hope: 60 },
     choices: {},
     flags: { pribit_count: 0 }
 };
@@ -454,6 +452,7 @@ function updatePreloader() {
     }
 }
 
+/* МУЗЫКА — акустическая гитара */
 let audioCtx = null;
 let musicTimers = [];
 let currentTheme = null;
@@ -464,99 +463,75 @@ function initAudio() {
 }
 
 const themes = {
-    // Оригинальные
-    childhood: { notes: [261.63, 329.63, 392.00, 523.25, 392.00, 329.63], tempo: 1.4, type: 'sine', vol: 0.05 },
-    melancholy: { notes: [146.83, 174.61, 220.00, 174.61], tempo: 2.6, type: 'triangle', vol: 0.045 },
-    love: { notes: [261.63, 329.63, 392.00, 493.88, 440.00, 392.00], tempo: 1.8, type: 'sine', vol: 0.055 },
-    empty: { notes: [110.00, 130.81, 146.83], tempo: 3.8, type: 'sine', vol: 0.04 },
-    hope: { notes: [293.66, 369.99, 440.00, 587.33, 440.00, 369.99], tempo: 1.5, type: 'sine', vol: 0.06 },
-    dread: { notes: [82.41, 98.00, 116.54], tempo: 4.2, type: 'sawtooth', vol: 0.03 },
-    insight: { notes: [523.25, 659.25, 783.99, 1046.50], tempo: 1.2, type: 'sine', vol: 0.07 },
-
-    // Струнно-гитарные темы
-    guitar_dawn: {
-        notes: [196.00, 246.94, 293.66, 392.00, 293.66, 246.94, 220.00, 196.00],
-        tempo: 1.9, type: 'triangle', vol: 0.05,
-        attack: 0.02, release: 3.5, vibrato: false
-    },
     guitar_warm: {
-        notes: [261.63, 329.63, 392.00, 329.63, 293.66, 329.63, 261.63],
-        tempo: 1.6, type: 'triangle', vol: 0.055,
-        attack: 0.02, release: 2.8, vibrato: false
-    },
-    guitar_lonely: {
-        notes: [146.83, 164.81, 196.00, 220.00, 196.00, 164.81],
-        tempo: 2.8, type: 'triangle', vol: 0.04,
-        attack: 0.02, release: 4.0, vibrato: false
+        notes: [130.81, 164.81, 196.00, 246.94, 196.00, 164.81, 130.81, 146.83],
+        tempo: 1.7, vol: 0.05
     },
     guitar_forest: {
-        notes: [220.00, 277.18, 329.63, 440.00, 329.63, 277.18, 246.94],
-        tempo: 2.2, type: 'triangle', vol: 0.05,
-        attack: 0.05, release: 3.5, vibrato: true
+        notes: [146.83, 174.61, 220.00, 261.63, 220.00, 174.61, 146.83],
+        tempo: 2.0, vol: 0.05
     },
-    strings_deep: {
-        notes: [110.00, 130.81, 164.81, 196.00, 164.81, 130.81],
-        tempo: 3.5, type: 'sawtooth', vol: 0.025,
-        attack: 0.8, release: 5.0, vibrato: false, filter: true
+    guitar_lonely: {
+        notes: [110.00, 146.83, 164.81, 196.00, 164.81, 146.83, 110.00],
+        tempo: 2.6, vol: 0.04
     },
-    strings_hope: {
-        notes: [261.63, 329.63, 392.00, 523.25, 587.33, 523.25, 392.00],
-        tempo: 2.0, type: 'triangle', vol: 0.05,
-        attack: 0.6, release: 4.5, vibrato: false, filter: true
+    guitar_deep: {
+        notes: [98.00, 123.47, 146.83, 174.61, 146.83, 123.47],
+        tempo: 2.8, vol: 0.045
+    },
+    guitar_hope: {
+        notes: [196.00, 246.94, 293.66, 392.00, 293.66, 246.94, 196.00, 220.00],
+        tempo: 1.6, vol: 0.055
     }
 };
+
+function playGuitarNote(freq, tempo, vol) {
+    if (!audioCtx) return;
+    try {
+        const now = audioCtx.currentTime;
+        const osc1 = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+
+        osc1.type = 'triangle';
+        osc1.frequency.value = freq;
+
+        osc2.type = 'sine';
+        osc2.frequency.value = freq * 2;
+
+        filter.type = 'lowpass';
+        filter.frequency.value = 1800;
+        filter.Q.value = 0.7;
+
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(vol, now + 0.005);
+        gain.gain.exponentialRampToValueAtTime(vol * 0.7, now + 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + tempo * 1.8);
+
+        osc1.connect(filter);
+        osc2.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + tempo * 2);
+        osc2.stop(now + tempo * 2);
+    } catch(e) {}
+}
 
 function playTheme(themeName) {
     if (!audioCtx) return;
     stopTheme();
     currentTheme = themeName;
-    const t = themes[themeName] || themes.melancholy;
+    const t = themes[themeName] || themes.guitar_warm;
     let idx = 0;
 
     function playNote() {
         if (currentTheme !== themeName) return;
-        try {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-
-            osc.type = t.type || 'sine';
-            osc.frequency.value = t.notes[idx % t.notes.length];
-
-            if (t.vibrato) {
-                const lfo = audioCtx.createOscillator();
-                const lfoGain = audioCtx.createGain();
-                lfo.frequency.value = 5;
-                lfoGain.gain.value = 3;
-                lfo.connect(lfoGain);
-                lfoGain.connect(osc.frequency);
-                lfo.start();
-                lfo.stop(audioCtx.currentTime + (t.tempo * 1.6));
-            }
-
-            const attack = t.attack || 0.4;
-            const release = t.release || (t.tempo * 1.6);
-            const vol = t.vol || 0.05;
-
-            gain.gain.setValueAtTime(0, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + attack);
-            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + release);
-
-            if (t.filter) {
-                const filter = audioCtx.createBiquadFilter();
-                filter.type = 'lowpass';
-                filter.frequency.value = 800;
-                osc.connect(filter);
-                filter.connect(gain);
-            } else {
-                osc.connect(gain);
-            }
-            gain.connect(audioCtx.destination);
-
-            osc.start();
-            osc.stop(audioCtx.currentTime + release + 0.1);
-
-            idx++;
-        } catch(e) {}
+        playGuitarNote(t.notes[idx % t.notes.length], t.tempo, t.vol);
+        idx++;
     }
 
     playNote();
@@ -573,19 +548,21 @@ function stopTheme() {
     currentTheme = null;
 }
 
+/* СЦЕНАРИЙ */
 const script = {
 
     prologue: {
-        bg: 'childhood.jpg', theme: 'guitar_dawn',
+        bg: 'childhood.jpg', theme: 'guitar_warm',
         title: 'ПРОЛОГ', subtitle: '～ Бесконечная дорога ～',
         lines: [
             { speaker: '...', text: 'Есть люди, которые рождаются, чтобы жить. Есть — чтобы искать. И есть — чтобы идти.' },
             { speaker: '...', text: 'Ибрагим был из третьих. Он не знал, чего хочет. Не знал, куда идёт. Знал только — что не может остановиться.' },
             { speaker: '...', text: 'С самого детства. С самого Ижевска. С той самой дороги у дома бабушки.' },
-            { speaker: '...', text: 'Он всю жизнь искал одно: ответ. На вопрос, который сам не мог сформулировать.' },
-            { speaker: '...', text: 'Почему я один? Почему всё так? Почему я не чувствую Бога, если знаю о Нём всё?' },
-            { speaker: '...', text: 'Он спрашивал это с шести лет. И не находил. Это история о его дороге. О людях, которых он встретил. О боли, которую он нёс.' },
-            { speaker: '...', text: 'И о том, что в самом конце он понял. Но об этом — позже.' }
+            { speaker: '...', text: 'Он всю жизнь задавал один вопрос. Не «зачем я живу?» — а «почему всё так?» Почему теряются люди? Почему рушится то, что строил? Почему Бог, которого он чувствовал с детства, не отвечает — когда так нужен ответ?' },
+            { speaker: '...', text: 'Он не терял веру. Никогда. Даже когда было темно. Даже когда злился. Даже когда кричал в подушку: «Аллах, если ты есть — почему ты молчишь?».' },
+            { speaker: '...', text: 'Он верил. Всегда. Просто — уставал верить. И тогда — шёл дальше. Молча. По дороге.' },
+            { speaker: '...', text: 'Это история о его дороге. О людях, которых он встретил. О боли, которую он нёс. И о записке, которую он хранил всю жизнь.' },
+            { speaker: '...', text: 'Об этом — позже. А сейчас — начнём с самого начала. С Ижевска.' }
         ],
         choices: [{ text: 'Начать', next: 'ch1' }]
     },
@@ -595,8 +572,13 @@ const script = {
         title: 'ГЛАВА I', subtitle: '～ Детство ～',
         lines: [
             { speaker: '...', text: 'Ижевск. Маленький город в Удмуртии. Здесь он родился. Здесь прошло его детство. В доме бабушки и дедушки — старом, деревянном, с запахом пирогов и пыли.' },
-            { speaker: '...', text: 'Во дворе с качелями и деревом, на которое нельзя было залезать. На улице, где все друг друга знали.' },
-            { speaker: '...', text: 'Его мама работала много. С утра до ночи. Она возвращалась уставшая, но всегда находила время погладить его по голове. И сказать: «Ибрагим, всё будет хорошо».' },
+            { speaker: '...', text: 'Бабушка пекла пироги по субботам. С капустой, с картошкой, с яблоками. Запах стоял на весь двор. Она всегда давала первый пирог ему — горячий, ещё дымящийся.' },
+            { speaker: '...', text: 'Бабушка была верующей. По-настоящему. Она читала Коран утром и вечером. Молилась долго, не торопясь. Иногда плакала во время молитвы. Он не понимал тогда — почему. Теперь понимает.' },
+            { speaker: '...', text: 'Она водила его в мечеть. Учила намазу — тихо, спокойно, без строгости. Говорила: «Аллах любит тебя, Ибрагим. Просто знай это». И он знал. Просто не чувствовал.' },
+            { speaker: '...', text: 'А потом он почувствовал. Однажды. Летом. Он сидел у окна. Смотрел на закат. И вдруг — что-то тёплое внутри. Не слова. Не молитва. Просто — тепло. Как будто кто-то рядом. Он не сказал бабушке. Но запомнил. И с этого дня — верил. По-настоящему.' },
+            { speaker: '...', text: 'Дедушка был другой. Он не молился. Не читал Коран. Он просто жил. Тихий, добрый, с руками в мозолях. Он любил рыбалку. И часто брал Ибрагима с собой.' },
+            { speaker: '...', text: 'Они сидели на берегу реки. Молчали. Смотрели на поплавок. И дедушка изредка говорил: «Терпение, внучек. Терпение». И это было важнее любых молитв.' },
+            { speaker: '...', text: 'Мама работала много. С утра до ночи. Она возвращалась уставшая, но всегда находила время погладить его по голове. И сказать: «Ибрагим, всё будет хорошо».' },
             { speaker: '...', text: 'Он ей верил. Не потому что было хорошо — а потому что она так говорила.' },
             { speaker: '...', text: 'Отца он помнил туманно. Как сквозь сон. Большие руки. Смех. Запах табака и машинного масла. Он умер, когда Ибрагиму было четыре. Или пять. Он точно не знал.' },
             { speaker: '...', text: 'Он помнил только одно: отец подбрасывал его к небу. Высоко-высоко. И ловил. И он смеялся. А отец — тоже смеялся. Это было самое счастливое воспоминание детства.' },
@@ -606,49 +588,25 @@ const script = {
             { speaker: '...', text: 'В доме был кот. Роджерс. Чёрно-белый. Важный. Как будто знал тайну мира — но молчал.' },
             { speaker: '...', text: 'Он спал на его кровати. Смотрел мудро. Никогда не мяукал зря. Когда Ибрагиму было плохо — Роджерс приходил. Молча. Ложился рядом. И сидел.' },
             { speaker: 'Ибрагим', text: 'Роджерс, а ты знаешь, зачем мы живём?' },
-            { speaker: '...', text: 'Роджерс молчал. Но как-то по-особенному. Как будто знал ответ — но не мог сказать словами.' },
-            { speaker: '...', text: 'Семья была мусульманская. Бабушка учила его Корану. Дедушка — намазу. Молились вместе. Каждый вечер.' },
-            { speaker: '...', text: 'Ибрагим знал суры. Знал хадисы. Знал правила. Его отдали в мусульманскую школу. Он знал больше, чем взрослые.' },
-            { speaker: '...', text: 'Но каждый раз, когда он читал молитву — внутри оставалась пустота. Он произносил слова. Правильные слова. Но не чувствовал Бога.' },
-            { speaker: 'Ибрагим', text: 'Аллах, если ты есть — почему я не чувствую тебя?' },
-            { speaker: '...', text: 'Ответа не было. Только тишина. Но эта тишина была не пустой. Как будто кто-то ждал. Как будто кто-то слушал.' },
-            { speaker: '...', text: 'Он не потерял веру. Он её никогда не находил. Только знал слова. И это было самое тяжёлое.' }
+            { speaker: '...', text: 'Роджерс молчал. Но как-то по-особенному. Как будто знал ответ — но не мог сказать словами.' }
         ],
         choices: [
-            { text: '«Значит, я недостаточно верю. Буду молиться больше.»', next: 'ch1_faith', faith: +15 },
-            { text: '«Может, Бог — это не про правила. Может, что-то другое.»', next: 'ch1_doubt', faith: -10, lost: +10 },
-            { text: '«Я пойму это. Когда-нибудь. Позже.»', next: 'ch1_wait', lost: +5 }
+            { text: '⟳ А что, если бы папа был жив?', next: 'pribit_dad', pribit: true },
+            { text: 'Жить дальше. Как есть.', next: 'ch1_amina', hope: +5 }
         ]
     },
 
-    ch1_faith: {
-        bg: 'childhood.jpg', theme: 'guitar_warm',
+    pribit_dad: {
+        bg: 'childhood.jpg', theme: 'guitar_lonely', isPribit: true,
         lines: [
-            { speaker: '...', text: 'Он молился. Каждый день. По пять раз. Как учили. Заучивал новые суры. Задавал вопросы имаму.' },
-            { speaker: 'Ибрагим', text: 'Я делаю всё правильно. Почему же так пусто?' },
-            { speaker: '...', text: 'А потом понял: молитва без чувства — не молитва. Слова. Просто слова.' }
+            { speaker: '...', text: 'Он закрывает глаза. И видит — как могло быть. Вот папа. Живой. Сидит рядом. Учит его рыбачить, как дедушка. Смеётся. Подбрасывает к небу.' },
+            { speaker: '...', text: 'Вот он идёт в школу — а папа ждёт у ворот. Вот он заканчивает школу — а папа обнимает его. Крепко. По-мужски. Вот он женится — а папа плачет в стороне.' },
+            { speaker: '...', text: 'Он видит всю жизнь. Прожитую с отцом. И это — хорошо. И это — тепло. Но это — не его жизнь. Это — то, чего не было.' },
+            { speaker: '...', text: 'Он открывает глаза. И понимает — эта жизнь была бы другой. Но была бы другая боль. Другие потери. Другие вопросы. И, может, он не стал бы тем, кто он есть.' },
+            { speaker: 'Ибрагим', text: 'Я не знаю, что было бы лучше. Я знаю только — что было. И это — моя жизнь. И я её принимаю.' }
         ],
-        choices: [{ text: '...', next: 'ch1_amina' }]
-    },
-
-    ch1_doubt: {
-        bg: 'childhood.jpg', theme: 'guitar_warm',
-        lines: [
-            { speaker: 'Ибрагим', text: 'Может, Бог — это не про правила. Может, что-то, что чувствуешь.' },
-            { speaker: '...', text: 'Эта мысль была страшной. И освобождающей. Он впервые почувствовал: он может думать сам. Без страха.' },
-            { speaker: 'Ибрагим', text: 'Я не хочу бояться Бога. Я хочу понимать.' },
-            { speaker: '...', text: 'Он не сказал это никому. Даже бабушке. Особенно бабушке.' }
-        ],
-        choices: [{ text: '...', next: 'ch1_amina' }]
-    },
-
-    ch1_wait: {
-        bg: 'childhood.jpg', theme: 'guitar_warm',
-        lines: [
-            { speaker: 'Ибрагим', text: 'Я пойму позже. Когда-нибудь.' },
-            { speaker: '...', text: 'Но «позже» так и не наступало. Оно никогда не наступает.' }
-        ],
-        choices: [{ text: '...', next: 'ch1_amina' }]
+        needs: { pain: +5, faith: +5 },
+        choices: [{ text: 'Вернуться', next: 'ch1_amina' }]
     },
 
     ch1_amina: {
@@ -670,7 +628,7 @@ const script = {
     },
 
     pribit_amina: {
-        bg: 'childhood.jpg', theme: 'dread', isPribit: true,
+        bg: 'childhood.jpg', theme: 'guitar_lonely', isPribit: true,
         lines: [
             { speaker: '...', text: 'Он закрывает глаза. И видит — как могло быть. Как он подходит к ней иначе. Спокойно. Уверенно. С шуткой.' },
             { speaker: '...', text: 'И она улыбается. Соглашается. Они гуляют. Смеются. Всё хорошо. На неделю. На месяц. На год.' },
@@ -679,19 +637,7 @@ const script = {
             { speaker: 'Ибрагим', text: 'Значит, это не моя вина. Значит, так было надо. И я не мог это изменить.' }
         ],
         needs: { pain: -10, faith: +5, hope: +5 },
-        choices: [{ text: 'Вернуться', next: 'ch1_amina_back' }]
-    },
-
-    ch1_amina_back: {
-        bg: 'childhood.jpg', theme: 'guitar_warm',
-        lines: [
-            { speaker: '...', text: 'Он возвращается в реальность. И понимает — выбор всё равно нужно делать.' },
-            { speaker: '...', text: 'Но теперь — без вины. Без «а что, если». Просто — так было суждено.' }
-        ],
-        choices: [
-            { text: '«Я стану лучше. Не назло — а для себя.»', next: 'ch2', hope: +15, mask: +5 },
-            { text: '«Мне никто не нужен. Никогда.»', next: 'ch2', hope: -15, mask: +20, pain: +10 }
-        ]
+        choices: [{ text: 'Вернуться', next: 'ch2' }]
     },
 
     ch2: {
@@ -703,13 +649,17 @@ const script = {
             { speaker: '...', text: 'Ибрагим подошёл. Сел рядом. И тоже стал смотреть в небо. Они молчали. Долго.' },
             { speaker: 'Юля', text: 'Ты первый, кто не спросил, почему я молчу.' },
             { speaker: '...', text: 'И он понял — вот она. Та, которая не требует слов. Та, с которой можно молчать.' },
-            { speaker: 'Юля', text: 'Ибрагим, а ты веришь в Бога?' },
-            { speaker: 'Ибрагим', text: 'Не знаю. А ты?' },
-            { speaker: 'Юля', text: 'Я верю, что есть что-то. Но оно не спасает. Просто смотрит.' },
-            { speaker: '...', text: 'Он не понял тогда. Запомнил. Он вообще запоминал всё, что она говорила.' },
             { speaker: '...', text: 'Они гуляли по лесу. Часто. Каждые выходные. Собирали шишки, слушали птиц, искали грибы — хотя никогда не находили.' },
             { speaker: '...', text: 'А иногда просто лежали на траве. Долго. Смотрели в небо. Облака текли медленно. Как время. Как их детство.' },
-            { speaker: '...', text: 'Впервые он чувствовал — не один. Как будто мир стал больше. Как будто появился кто-то, кто понимает.' },
+            { speaker: 'Юля', text: 'Ибрагим, а ты веришь в Бога?' },
+            { speaker: 'Ибрагим', text: 'Верю. А ты?' },
+            { speaker: 'Юля', text: 'Я тоже. Только я думаю — он смотрит. И не спасает. Просто смотрит.' },
+            { speaker: '...', text: 'Он не понял тогда. Запомнил. Он вообще запоминал всё, что она говорила.' },
+            { speaker: '...', text: 'Они много говорили. Обо всём. О смысле жизни. О том, почему люди уходят. О том, что будет после смерти. Юля говорила об этом спокойно. Как о чём-то близком.' },
+            { speaker: 'Юля', text: 'Я иногда думаю — а если я исчезну? Ты будешь меня искать?' },
+            { speaker: 'Ибрагим', text: 'Конечно. Всегда. Где угодно.' },
+            { speaker: 'Юля', text: 'Хорошо. Тогда я знаю — я не одна.' },
+            { speaker: '...', text: 'Он не понял тогда, что она это серьёзно. Он думал — это просто разговор. Просто слова. Просто дети.' },
             { speaker: 'Ибрагим', text: 'Юля, ты самая лучшая.' },
             { speaker: 'Юля', text: 'Ты тоже. Не забывай меня. Ладно?' },
             { speaker: 'Ибрагим', text: 'Никогда.' },
@@ -722,14 +672,15 @@ const script = {
     },
 
     ch2_close: {
-        bg: 'julia-izhevsk.jpg', theme: 'guitar_forest',
+        bg: 'julia-izhevsk.jpg', theme: 'guitar_lonely',
         lines: [
             { speaker: '...', text: 'Он держал её за руку. Они стояли на берегу реки. Казалось, время остановилось.' },
             { speaker: '...', text: 'А через год — она исчезла. СМС от неизвестного номера. Сухие слова: «Юля умерла. Прости».' },
             { speaker: 'Ибрагим', text: 'Нет. Нет. Нет. Это неправда.' },
             { speaker: '...', text: 'Он не поверил. Но и не искал. Просто ждал. Месяц. Два. Полгода. Год. Два года. Каждый день.' },
             { speaker: '...', text: 'Он верил — она жива. Верил — она вернётся. Но она не возвращалась. И он начал забывать её голос.' },
-            { speaker: '...', text: 'Он не знал тогда: Юля обманула его. Она была жива. Просто решила исчезнуть.' }
+            { speaker: '...', text: 'Он не знал тогда: Юля обманула его. Она была жива. Просто решила исчезнуть.' },
+            { speaker: '...', text: 'Он молился за неё. Каждый вечер. Как бабушка учила. «Аллах, если она жива — сохрани её. Если умерла — прости ей». И плакал. Тихо. Чтобы мама не слышала.' }
         ],
         needs: { pain: +20 },
         choices: [
@@ -740,7 +691,7 @@ const script = {
     },
 
     ch2_promise: {
-        bg: 'julia-izhevsk.jpg', theme: 'guitar_forest',
+        bg: 'julia-izhevsk.jpg', theme: 'guitar_lonely',
         lines: [
             { speaker: 'Ибрагим', text: 'Ты не права, Юля. Всё будет хорошо. Обещаю.' },
             { speaker: 'Юля', text: 'Ты добрый. Слишком добрый. Такие, как ты, страдают больше всех.' },
@@ -755,7 +706,7 @@ const script = {
     },
 
     pribit_julia: {
-        bg: 'julia-izhevsk.jpg', theme: 'dread', isPribit: true,
+        bg: 'julia-izhevsk.jpg', theme: 'guitar_deep', isPribit: true,
         lines: [
             { speaker: '...', text: 'Он закрывает глаза. И видит — как могло быть. Что, если бы он не поверил в её смерть? Что, если бы искал? Что, если бы нашёл?' },
             { speaker: '...', text: 'Он видит — вот он находит её номер. Пишет. Она отвечает. Они снова вместе.' },
@@ -772,53 +723,35 @@ const script = {
         title: 'ГЛАВА III', subtitle: '～ Ильназ ～',
         lines: [
             { speaker: '...', text: 'Казань. Шестой класс. Новая школа. Новые лица. Мама работала в магазине тканей — целыми днями.' },
-            { speaker: '...', text: 'Ибрагим был один. Снова один. Снова новый город.' },
+            { speaker: '...', text: 'Ибрагим был один. Снова один. Снова новый город. Снова все чужие.' },
             { speaker: '...', text: 'А потом появился Ильназ. Приехал из Азнакаево. Скромный, опрятный. Снаружи. Внутри — чёрт с рогами.' },
             { speaker: 'Ильназ', text: 'Слушай, у тебя пятьдесят рублей есть? Мне на автобус не хватает.' },
             { speaker: 'Ибрагим', text: 'Конечно, держи.' },
-            { speaker: '...', text: 'Ильназ взял. А потом — отдал ему его же деньги. Оказалось, Ибрагим сам их уронил.' },
+            { speaker: '...', text: 'Ильназ взял. А потом — отдал ему его же деньги. Оказалось, Ибрагим сам их уронил. Ильназ поднял. И решил пошутить.' },
             { speaker: 'Ильназ', text: 'Прости, братан. Хотел проверить.' },
             { speaker: 'Ибрагим', text: 'Ты — придурок. Но весёлый.' },
             { speaker: '...', text: 'А через неделю Ильназ вынес из дома диск со «Сталкером». С этого началась дружба.' },
-            { speaker: '...', text: 'Ильназ стал его единственным другом. Тем, кто не уходил. Тем, кто был рядом.' },
-            { speaker: '...', text: 'Тем, кто говорил: «Я здесь». Даже когда Ибрагим не отвечал.' },
-            { speaker: '...', text: 'Ильназ не уходил. Никогда.' }
-        ],
-        choices: [
-            { text: '«Ильназ — мой лучший друг.»', next: 'ch3_1', hope: +15 },
-            { text: '«Дружба — это не про меня.»', next: 'ch3_2', hope: -10, mask: +10 },
-            { text: '«Спасибо, что ты рядом.»', next: 'ch3_1', hope: +20, faith: +5 }
-        ]
-    },
-
-    ch3_1: {
-        bg: 'school.webp', theme: 'guitar_warm',
-        lines: [
-            { speaker: '...', text: 'Они играли в Сталкера. Ночами. Это были самые спокойные ночи в жизни Ибрагима.' },
+            { speaker: '...', text: 'Они играли ночами. Обсуждали миры, зоны, артефакты. Это были самые спокойные ночи в жизни Ибрагима.' },
             { speaker: 'Ильназ', text: 'Ибрагим, ты кем хочешь стать?' },
             { speaker: 'Ибрагим', text: 'Богатым. И чтоб девушки любили.' },
             { speaker: 'Ильназ', text: 'Пф. А я хочу просто спокойно жить.' },
-            { speaker: '...', text: 'Они не знали тогда, что «спокойно» — это самое дорогое.' }
+            { speaker: '...', text: 'Они не знали тогда, что «спокойно» — это самое дорогое. И самое трудное.' },
+            { speaker: '...', text: 'Ильназ стал его единственным другом. Тем, кто не уходил. Тем, кто был рядом. Тем, кто звонил первым. Тем, кто приезжал без приглашения.' },
+            { speaker: '...', text: 'Тем, кто говорил: «Я здесь». Даже когда Ибрагим не отвечал на звонки. Даже когда закрывался в комнате. Даже когда был занят собой.' },
+            { speaker: '...', text: 'Ильназ не уходил. Никогда.' }
         ],
-        needs: { hope: +10, mask: -5 },
-        choices: [{ text: '...', next: 'ch4' }]
-    },
-
-    ch3_2: {
-        bg: 'school.webp', theme: 'guitar_warm',
-        lines: [
-            { speaker: 'Ибрагим', text: 'Дружба — это не про меня. Люди всё равно уходят.' },
-            { speaker: '...', text: 'Но Ильназ всё равно был рядом. Всегда. Он просто был. Как Роджерс. Как Бог. Молча. Рядом.' }
-        ],
-        needs: { mask: +10, hope: -5 },
-        choices: [{ text: '...', next: 'ch4' }]
+        choices: [
+            { text: '«Ильназ — мой лучший друг.»', next: 'ch4', hope: +15 },
+            { text: '«Дружба — это не про меня.»', next: 'ch4', hope: -10, mask: +10 },
+            { text: '«Спасибо, что ты рядом.»', next: 'ch4', hope: +20, faith: +5 }
+        ]
     },
 
     ch4: {
         bg: 'dasha-time.jpg', theme: 'guitar_warm',
         title: 'ГЛАВА IV', subtitle: '～ Даша ～',
         lines: [
-            { speaker: '...', text: '7 класс. Даша. Одноклассница. Неприступная. Он смотрел на неё. Каждый день.' },
+            { speaker: '...', text: '7 класс. Даша. Одноклассница. Неприступная. Он смотрел на неё. Каждый день. Все уроки.' },
             { speaker: '...', text: 'Она была — другая. Отстранённая. Как будто в своём мире.' },
             { speaker: 'Ибрагим', text: 'Даша, давай встретимся.' },
             { speaker: 'Даша', text: 'Нет.' },
@@ -826,40 +759,48 @@ const script = {
             { speaker: '...', text: 'Он не понимал тогда: он хотел не Дашу. Он хотел доказать себе — что достоин.' },
             { speaker: '...', text: 'К 9 классу он добился.' },
             { speaker: 'Даша', text: 'Ладно. Давай попробуем.' },
-            { speaker: 'Ибрагим', text: 'Ты не пожалеешь. Обещаю.' }
+            { speaker: 'Ибрагим', text: 'Ты не пожалеешь. Обещаю.' },
+            { speaker: '...', text: 'Первые месяцы были как в тумане. Они гуляли. Смотрели фильмы. Смеялись. Она держала его за руку — и он впервые чувствовал, что нужен.' },
+            { speaker: '...', text: 'Он начал замечать — Даша устаёт. От его молчания. От его уходов в себя. От того, что он не говорит «люблю». От того, что он не говорит ничего важного.' },
+            { speaker: 'Даша', text: 'Ты всегда молчишь. Как будто тебя нет рядом.' },
+            { speaker: 'Ибрагим', text: 'Я просто не знаю, что сказать.' },
+            { speaker: 'Даша', text: 'Тогда просто скажи. Что-нибудь. Хоть что-нибудь.' },
+            { speaker: '...', text: 'Он пытался. Правда пытался. Но слова давались тяжело. Как будто внутри — стена. Он хотел её сломать. Но не знал — как.' },
+            { speaker: '...', text: 'А она — терпела. Долго. Три года. И устала. По-настоящему.' }
         ],
         choices: [
-            { text: '«Я буду идеальным парнем.»', next: 'ch4_1', hope: +10, mask: +10 },
-            { text: '«Наконец-то. Но что дальше?»', next: 'ch4_2', faith: +10, lost: +5 }
+            { text: '«Я постараюсь быть открытым.»', next: 'ch4_more', hope: +10 },
+            { text: '«Может, это не любовь. Может, игра.»', next: 'ch4_game', lost: +10 }
         ]
     },
 
-    ch4_1: {
+    ch4_more: {
         bg: 'dasha-time.jpg', theme: 'guitar_warm',
         lines: [
-            { speaker: '...', text: 'Он старался. Дарил цветы. Писал стихи. Она улыбалась. Ему казалось — это счастье.' },
-            { speaker: '...', text: 'Но счастье было хрупким. Он это чувствовал — но гнал мысль.' },
-            { speaker: '...', text: 'Он не любил её. Он любил идею. Идею победы. Идею маски, которая наконец снята.' }
+            { speaker: '...', text: 'Он пытался больше. Говорить. Писать. Быть рядом. Но не получалось. Слова — не шли.' },
+            { speaker: '...', text: 'Он писал ей длинные смс — и стирал. Не отправлял. Он думал — если скажет не то — станет хуже.' },
+            { speaker: '...', text: 'Он думал — если промолчит — пройдёт. Но не проходило. Оно накапливалось. В ней. В нём. В комнате.' }
         ],
-        choices: [{ text: '...', next: 'ch5' }]
+        choices: [{ text: 'Дальше', next: 'ch5' }]
     },
 
-    ch4_2: {
-        bg: 'dasha-time.jpg', theme: 'guitar_warm',
+    ch4_game: {
+        bg: 'dasha-time.jpg', theme: 'guitar_lonely',
         lines: [
-            { speaker: 'Ибрагим', text: 'Наконец-то. Но что дальше?' },
-            { speaker: '...', text: 'Этот вопрос он задавал себе три года. И не находил ответа. Потому что ответ был: ничего. Просто — жить рядом. А он не умел «просто».' }
+            { speaker: '...', text: 'Он сам не понимал, что с ним. Любит ли он её. Или — привык. Или — боится потерять. Или — не хочет быть один.' },
+            { speaker: '...', text: 'Он не мог ответить себе. А ей — тем более.' },
+            { speaker: '...', text: 'Он смотрел на неё — и думал: «а если это не она?». А если — есть кто-то, кто ждёт. Кто понимает. С кем будет легче.' }
         ],
-        needs: { faith: +5, lost: +5 },
-        choices: [{ text: '...', next: 'ch5' }]
+        needs: { lost: +10, mask: +5 },
+        choices: [{ text: 'Дальше', next: 'ch5' }]
     },
 
     ch5: {
         bg: 'svetly.jpg', theme: 'guitar_lonely',
         title: 'ГЛАВА V', subtitle: '～ Светлый ～',
         lines: [
-            { speaker: '...', text: 'Мама взяла ипотеку. В Светлом — посёлке под Казанью. Трёхэтажные дома. Хороший асфальт. Тишина. Квартира на третьем этаже.' },
-            { speaker: '...', text: 'Голые стены. Бетон. Никакого ремонта. Матрас прямо на полу. Туалет — без двери. Только проём. И шторка, которую он так и не повесил.' },
+            { speaker: '...', text: 'Мама взяла ипотеку. В Светлом — посёлке под Казанью. Трёхэтажные дома. Хороший асфальт. Тишина. Квартира на первом этаже.' },
+            { speaker: '...', text: 'Первая квартира в его жизни. Своя. Но — пустая. Голые стены. Бетон. Никакого ремонта. Матрас прямо на полу. Туалет — без двери. Только проём. И шторка, которую он так и не повесил.' },
             { speaker: '...', text: 'Мама уехала в Москву — зарабатывать. Ибрагим остался один в этой пустой квартире. И ему это нравилось.' },
             { speaker: '...', text: 'Квартира была отражением его души. Голая. Холодная. Без ремонта. Он не хотел её обживать. Не хотел вкладывать силы. Не хотел превращать в «дом».' },
             { speaker: '...', text: 'Потому что дом — это когда знаешь, что останешься. А он не знал. И не хотел знать. Ему нравился хаос. Нравилась незавершённость. Нравилось, что ничего не держит.' },
@@ -869,7 +810,7 @@ const script = {
     },
 
     ch5_shinka: {
-        bg: 'shinka.jpg', theme: 'guitar_dawn',
+        bg: 'shinka.jpg', theme: 'guitar_warm',
         lines: [
             { speaker: '...', text: 'Потом — шиномонтаж. Гараж на окраине. Запах резины и масла. Гора покрышек во дворе. Ржавый подъёмник. И музыка из старого радио.' },
             { speaker: '...', text: 'Ильназ — убийца колёс. Он умудрялся сломать то, что сломать невозможно. Но делал это с таким энтузиазмом, что никто не злился. Ибрагим — вечно болел. Простужался каждый месяц. Но работал.' },
@@ -881,7 +822,7 @@ const script = {
     },
 
     ch5_stroyka: {
-        bg: 'stroyka.jpg', theme: 'empty',
+        bg: 'stroyka.jpg', theme: 'guitar_lonely',
         lines: [
             { speaker: '...', text: 'А потом была стройка. В Ижевске. У Тимура. Зимой.' },
             { speaker: '...', text: 'Минус тридцать. Утро. Тёмное небо. Иней на ресницах. Пар изо рта. Работали в ватниках, в шапках-ушанках, в валенках. Но всё равно мёрзли.' },
@@ -932,7 +873,7 @@ const script = {
         lines: [
             { speaker: '...', text: 'Он вышел на балкон. Ночью. Курить. В пустой квартире. С видом на такие же пустые трёхэтажки.' },
             { speaker: '...', text: 'Он закурил. Смотрел на огонёк сигареты. На дым, который уходил в темноту. На небо, в котором не было звёзд — только оранжевый свет фонарей.' },
-            { speaker: 'Ибрагим', text: 'Аллах, если ты есть... Ты меня слышишь?' },
+            { speaker: 'Ибрагим', text: 'Аллах, если ты есть... Я знаю, что ты есть. Ты всегда был. Но почему — так? Почему всё так?' },
             { speaker: '...', text: 'Ответа не было. Только тишина. Но в этой тишине было что-то. Что-то, что он не мог назвать словами.' },
             { speaker: '...', text: 'Он докурил. Потушил окурок. И пошёл спать. На матрас. На полу. В пустой квартире.' }
         ],
@@ -941,7 +882,7 @@ const script = {
     },
 
     ch6: {
-        bg: 'julia-time.jpg', theme: 'love',
+        bg: 'julia-time.jpg', theme: 'guitar_lonely',
         title: 'ГЛАВА VI', subtitle: '～ Возвращение ～',
         lines: [
             { speaker: '...', text: 'С Дашей — три года. И вдруг — измена. Он увидел переписку. Случайно. Открыл телефон — и всё.' },
@@ -964,7 +905,7 @@ const script = {
     },
 
     pribit_julia_return: {
-        bg: 'julia-time.jpg', theme: 'dread', isPribit: true,
+        bg: 'julia-time.jpg', theme: 'guitar_deep', isPribit: true,
         lines: [
             { speaker: '...', text: 'Он закрывает глаза. И видит — что, если бы он остался. По-настоящему. Не в голове, а в сердце.' },
             { speaker: '...', text: 'Он видит — они живут вместе. В Ижевске. У неё старый дом. У него работа. Простая жизнь.' },
@@ -977,14 +918,15 @@ const script = {
     },
 
     ch7: {
-        bg: 'julia-dark.webp', theme: 'strings_deep',
+        bg: 'julia-dark.webp', theme: 'guitar_deep',
         title: 'ГЛАВА VII', subtitle: '～ После ～',
         lines: [
             { speaker: '...', text: 'Юли больше нет. Он не любит об этом говорить. Не любит вспоминать.' },
             { speaker: '...', text: 'Он приехал к ней утром. Дверь была открыта. Он вошёл. И мир остановился.' },
             { speaker: '...', text: 'Он не помнит, как вызвал скорую. Не помнит, как приехала полиция. Не помнит, как отвечал на вопросы. Час. Два. Три.' },
-            { speaker: '...', text: 'Помнит только записку. Три слова, написанные её рукой: «Люблю. Спасибо. Прости».' },
-            { speaker: '...', text: 'Он держал её в руках. Долго. Потом — сжёг. Не мог смотреть.' },
+            { speaker: '...', text: 'Помнит только записку. На столе. Развёрнутую. Написанную её рукой. Длинную. Строчек двадцать. И последняя строка: «Я люблю тебя. Спасибо за всё».' },
+            { speaker: '...', text: 'Он держал её в руках. Долго. Очень долго. Потом — сложил. И положил в кошелёк. Внутренний карман. Тот, где никто не ищет. И носил её с тех пор. Всегда.' },
+            { speaker: '...', text: 'Даже через десять лет — она лежала у него в кошельке. Потёртая. Мягкая. С тем самым почерком.' },
             { speaker: '...', text: 'На похоронах было тихо. Христианских. Тяжёлых. Её мать плакала на его плече. Он держал её. Молчал.' },
             { speaker: '...', text: 'Он держался. Достойно. Молча. Как учила мама. Как учил дедушка. Как учил Роджерс — молчать, но быть рядом.' },
             { speaker: '...', text: 'Он вернулся к работе. Озон. Разгрузка машин. Утром — на склад. Вечером — домой. И так — день за днём.' },
@@ -1002,7 +944,7 @@ const script = {
     },
 
     pribit_last: {
-        bg: 'ibrahim-field.webp', theme: 'strings_deep', isPribit: true,
+        bg: 'ibrahim-field.webp', theme: 'guitar_deep', isPribit: true,
         lines: [
             { speaker: '...', text: 'Он закрывает глаза. И видит — что, если бы он приехал раньше?' },
             { speaker: '...', text: 'Он видит — вот он звонит. Она берёт трубку. Он едет к ней. Говорит то, что должен был сказать.' },
@@ -1016,20 +958,21 @@ const script = {
     },
 
     finale: {
-        bg: 'ibrahim-walk.jpg', theme: 'strings_hope',
+        bg: 'ibrahim-walk.jpg', theme: 'guitar_hope',
         title: 'ФИНАЛ', subtitle: '～ Бесконечная дорога ～',
         lines: [
             { speaker: '...', text: 'Он вышел на улицу. Утро. Туман над полем. Дорога. Он шёл. Просто шёл.' },
             { speaker: '...', text: 'И в этой тишине — он вдруг вспомнил всё. Маму. Бабушку. Дедушку. Роджерса. Юлю. Дашу. Ильназа. Саню. Друзей со склада. Сидр на балконе. Дым сигареты. Закат. Светлый. Шиномонтаж. Поход с палатками.' },
+            { speaker: '...', text: 'И записку. Ту самую. Которая всё ещё лежала в его кошельке. Потёртая. Мягкая.' },
             { speaker: '...', text: 'Он вспомнил, как боялся быть один. Как убеждал себя, что он один.' },
             { speaker: '...', text: 'И вдруг — понял.' },
             { speaker: 'Ибрагим', text: 'Я всю жизнь думал, что я один. Но я никогда не был один.' },
             { speaker: '...', text: 'Мама звонила ему каждый вечер. Он не всегда брал — но она не переставала.' },
             { speaker: '...', text: 'Ильназ был рядом всегда. Даже когда Ибрагим не замечал.' },
             { speaker: '...', text: 'Бабушка приносила ему чай. Дедушка клал руку на плечо. Роджерс сидел у кровати. Саня спал на груди.' },
-            { speaker: '...', text: 'Юля — ушла. Но она была. Она подарила ему детство. Она подарила ему первую любовь.' },
+            { speaker: '...', text: 'Юля — ушла. Но она была. Она подарила ему детство. Она подарила ему первую любовь. И записку. Которую он пронёс через всю жизнь.' },
             { speaker: '...', text: 'Даша — ушла. Но она научила его, что любовь — это не победа. Это — принятие.' },
-            { speaker: '...', text: 'Бог — был. Всё время. Молча. В тишине между словами. В паузах между молитвами.' },
+            { speaker: '...', text: 'Бог — был. Всё время. Он чувствовал его с детства. Тихо. Тепло. Даже когда сомневался. Даже когда злился. Даже когда кричал в пустоту. Бог — был.' },
             { speaker: 'Ибрагим', text: 'Бог, если ты есть — я понял.' },
             { speaker: 'Ибрагим', text: 'Ты не ждал, когда я тебя найду. Ты был со мной. Всё время. Молча. Рядом.' },
             { speaker: 'Ибрагим', text: 'Ты не спасал меня от боли. Но ты был рядом с болью.' },
@@ -1077,12 +1020,6 @@ function goToScene(sceneId) {
     currentScene = sceneId;
     currentLine = 0;
 
-    if (scene.isPribit) {
-        const overlay = document.getElementById('pribit-overlay');
-        overlay.classList.add('show');
-        setTimeout(() => overlay.classList.remove('show'), 2500);
-    }
-
     setBackground(scene.bg);
     if (scene.theme) playTheme(scene.theme);
     if (scene.title) showChapterTitle(scene.title, scene.subtitle);
@@ -1102,9 +1039,16 @@ function goToScene(sceneId) {
 
 function showChapterTitle(title, subtitle) {
     const el = document.getElementById('chapter-title');
+    const darkEl = document.getElementById('chapter-dark');
+
     el.innerHTML = title + (subtitle ? '<small>' + subtitle + '</small>' : '');
+    darkEl.classList.add('show');
     el.classList.add('show');
-    setTimeout(() => el.classList.remove('show'), 3400);
+
+    setTimeout(() => {
+        el.classList.remove('show');
+        darkEl.classList.remove('show');
+    }, 3400);
 }
 
 function showLine() {
@@ -1196,7 +1140,7 @@ function updateHUD() {
 
 function showEnding() {
     stopTheme();
-    playTheme('strings_hope');
+    playTheme('guitar_hope');
     document.getElementById('end-title').textContent = '～ Бесконечная дорога ～';
     document.getElementById('end-text').textContent =
         'Он больше не искал. Не потому что нашёл. А потому что понял — искать было не нужно. Всё, что он искал, было рядом. Всю жизнь.';
